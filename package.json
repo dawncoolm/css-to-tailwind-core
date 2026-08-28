@@ -3,6 +3,15 @@
   "version": "1.0.0",
   "description": "Convert CSS into Tailwind CSS utility classes. Zero runtime dependencies, Tailwind v3 and v4 presets, full diagnostics.",
   "license": "MIT",
+  "author": "myk",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dawncoolm/css-to-tailwind-core.git"
+  },
+  "homepage": "https://github.com/dawncoolm/css-to-tailwind-core#readme",
+  "bugs": {
+    "url": "https://github.com/dawncoolm/css-to-tailwind-core/issues"
+  },
   "type": "module",
   "sideEffects": false,
   "engines": {
@@ -41,7 +50,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "bench": "vitest bench --run",
-    "parity": "tsx scripts/parity-diff.ts"
+    "parity": "tsx scripts/parity-diff.ts",
+    "prepublishOnly": "npm run typecheck && npm run test && npm run build"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
