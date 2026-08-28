@@ -25,6 +25,7 @@
  * only.
  */
 
+import { OPACITY_STEPS } from '../../theme/scales.js'
 import type { ConversionContext } from '../context.js'
 import { resolveSubValue } from '../context.js'
 import type { HandlerFn, HandlerGroup, ValueTable } from '../registry.js'
@@ -52,23 +53,14 @@ const NO_SUB_DEFAULTS: ValueTable = Object.freeze({})
  * spellings the original shipped; `opacity(.5)` is deliberately absent there and
  * stays absent here, falling through to `backdrop-opacity-[.5]`.
  */
-const BACKDROP_OPACITY_VALUES: ValueTable = Object.freeze({
-  'opacity(0)': 'backdrop-opacity-0',
-  'opacity(0.05)': 'backdrop-opacity-5',
-  'opacity(0.1)': 'backdrop-opacity-10',
-  'opacity(0.2)': 'backdrop-opacity-20',
-  'opacity(0.25)': 'backdrop-opacity-25',
-  'opacity(0.3)': 'backdrop-opacity-30',
-  'opacity(0.4)': 'backdrop-opacity-40',
-  'opacity(0.5)': 'backdrop-opacity-50',
-  'opacity(0.6)': 'backdrop-opacity-60',
-  'opacity(0.7)': 'backdrop-opacity-70',
-  'opacity(0.75)': 'backdrop-opacity-75',
-  'opacity(0.8)': 'backdrop-opacity-80',
-  'opacity(0.9)': 'backdrop-opacity-90',
-  'opacity(0.95)': 'backdrop-opacity-95',
-  'opacity(1)': 'backdrop-opacity-100'
-})
+const BACKDROP_OPACITY_VALUES: ValueTable = Object.freeze(
+  Object.fromEntries(
+    Object.entries(OPACITY_STEPS).map(([value, step]) => [
+      `opacity(${value})`,
+      `backdrop-opacity-${step}`
+    ])
+  )
+)
 
 /**
  * Filter functions that have a `filter` utility family.

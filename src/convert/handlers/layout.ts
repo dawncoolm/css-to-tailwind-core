@@ -14,7 +14,7 @@ import {
   normalizeFractionPercentage,
   toArbitrary
 } from '../../utils/value.js'
-import { SIZE_FRACTIONS } from '../../theme/scales.js'
+import { sizeFractionsWithout } from '../../theme/scales.js'
 import {
   arbitraryColorProperty,
   arbitraryLengthProperty as arbitraryLength,
@@ -49,11 +49,7 @@ import {
  * excluded both from `top`/`right`/`bottom`/`left` because `top-screen` is not a
  * Tailwind class.
  */
-const INSET_KEYWORDS: ValueTable = Object.freeze(
-  Object.fromEntries(
-    Object.entries(SIZE_FRACTIONS).filter(([value]) => value !== '100vw' && value !== '100vh')
-  )
-)
+const INSET_KEYWORDS = sizeFractionsWithout('100vw', '100vh')
 
 /**
  * Build the handler for one inset property.

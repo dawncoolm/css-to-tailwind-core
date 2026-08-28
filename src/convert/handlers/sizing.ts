@@ -10,29 +10,13 @@
  */
 
 import type { HandlerFn, HandlerGroup, ValueTable } from '../registry.js'
-import { SIZE_FRACTIONS } from '../../theme/scales.js'
+import { sizeFractionsWithout } from '../../theme/scales.js'
 import { isUnit } from '../../utils/unit.js'
 import { normalizeFractionPercentage, toArbitrary } from '../../utils/value.js'
 import { arbitraryLengthProperty as logicalSize } from './shared.js'
 
-/**
- * {@link SIZE_FRACTIONS} without one viewport key.
- *
- * The shared table maps both `100vw` and `100vh` to `screen`, but only the axis
- * matching the property may use it: `width: 100vh` is not `w-screen`. The
- * original expressed this by deleting the key from a table it rebuilt per call;
- * the two resulting tables are built once here instead.
- */
-const fractionsWithout = (excluded: string): Readonly<Record<string, string>> => {
-  const table: Record<string, string> = {}
-  for (const [value, suffix] of Object.entries(SIZE_FRACTIONS)) {
-    if (value !== excluded) table[value] = suffix
-  }
-  return Object.freeze(table)
-}
-
-const WIDTH_FRACTIONS = fractionsWithout('100vh')
-const HEIGHT_FRACTIONS = fractionsWithout('100vw')
+const WIDTH_FRACTIONS = sizeFractionsWithout('100vh')
+const HEIGHT_FRACTIONS = sizeFractionsWithout('100vw')
 
 /** Build the `width`/`height` handler for one axis. */
 const axisSize = (prefix: string, fractions: Readonly<Record<string, string>>): HandlerFn =>

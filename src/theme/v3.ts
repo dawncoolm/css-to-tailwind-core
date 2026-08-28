@@ -3,6 +3,7 @@
 import {
   BOX_SHADOW_SCALE_V3,
   FONT_SIZE_SCALE,
+  LINE_HEIGHT_RATIOS,
   INSET_FRACTIONS,
   MEDIA_BREAKPOINTS,
   RADIUS_SCALE_V3,
@@ -11,6 +12,7 @@ import {
   SKEW_VALUES,
   SPACING_SCALE,
   TRANSLATE_VALUES,
+  buildBorderWidthScale,
   buildSpacingScale
 } from './scales.js'
 
@@ -141,8 +143,6 @@ export const DEFAULT_VALUES_V3: Readonly<
     bold: 'font-bold'
   }),
   'line-height': Object.freeze({
-    '1': 'leading-none',
-    '2': 'leading-loose',
     '.75rem': 'leading-3',
     '0.75rem': 'leading-3',
     '1rem': 'leading-4',
@@ -152,46 +152,13 @@ export const DEFAULT_VALUES_V3: Readonly<
     '2rem': 'leading-8',
     '2.25rem': 'leading-9',
     '2.5rem': 'leading-10',
-    '1.25': 'leading-tight',
-    '1.375': 'leading-snug',
-    '1.5': 'leading-normal',
-    '1.625': 'leading-relaxed'
+    ...LINE_HEIGHT_RATIOS
   }),
-  'border-width': Object.freeze({
-    '0px': 'border-0',
-    '2px': 'border-2',
-    '4px': 'border-4',
-    '8px': 'border-8',
-    '1px': 'border'
-  }),
-  'border-top-width': Object.freeze({
-    '0px': 'border-t-0',
-    '2px': 'border-t-2',
-    '4px': 'border-t-4',
-    '8px': 'border-t-8',
-    '1px': 'border-t'
-  }),
-  'border-right-width': Object.freeze({
-    '0px': 'border-r-0',
-    '2px': 'border-r-2',
-    '4px': 'border-r-4',
-    '8px': 'border-r-8',
-    '1px': 'border-r'
-  }),
-  'border-bottom-width': Object.freeze({
-    '0px': 'border-b-0',
-    '2px': 'border-b-2',
-    '4px': 'border-b-4',
-    '8px': 'border-b-8',
-    '1px': 'border-b'
-  }),
-  'border-left-width': Object.freeze({
-    '0px': 'border-l-0',
-    '2px': 'border-l-2',
-    '4px': 'border-l-4',
-    '8px': 'border-l-8',
-    '1px': 'border-l'
-  }),
+  'border-width': buildBorderWidthScale('border'),
+  'border-top-width': buildBorderWidthScale('border-t'),
+  'border-right-width': buildBorderWidthScale('border-r'),
+  'border-bottom-width': buildBorderWidthScale('border-b'),
+  'border-left-width': buildBorderWidthScale('border-l'),
   transition: Object.freeze({
     'all 150ms cubic-bezier(0.4, 0, 0.2, 1)': 'transition-all',
     'background-color, border-color, color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter 150ms cubic-bezier(0.4, 0, 0.2, 1)':

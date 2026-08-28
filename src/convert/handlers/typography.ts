@@ -13,7 +13,7 @@
 import type { HandlerGroup, ValueTable } from '../registry.js'
 import { isNumber, isUnit } from '../../utils/unit.js'
 import { toArbitrary } from '../../utils/value.js'
-import { FONT_SIZE_SCALE } from '../../theme/scales.js'
+import { FONT_SIZE_SCALE, LINE_HEIGHT_RATIOS } from '../../theme/scales.js'
 import {
   arbitraryColorProperty,
   arbitraryLengthProperty,
@@ -62,14 +62,6 @@ const LETTER_SPACING_SCALE: ValueTable = Object.freeze({
  * Unitless `line-height` ratios. The rem-valued `leading-3` … `leading-10`
  * steps live in the version preset and are applied by `convertDeclaration`.
  */
-const LINE_HEIGHT_RATIOS: ValueTable = Object.freeze({
-  '1': 'leading-none',
-  '2': 'leading-loose',
-  '1.25': 'leading-tight',
-  '1.375': 'leading-snug',
-  '1.5': 'leading-normal',
-  '1.625': 'leading-relaxed'
-})
 
 /**
  * `font-weight` keywords CSS accepts alongside the numeric scale.

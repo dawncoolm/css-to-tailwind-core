@@ -14,6 +14,7 @@
  */
 
 import type { HandlerGroup, ValueTable } from '../registry.js'
+import { OPACITY_STEPS } from '../../theme/scales.js'
 import { isUnit } from '../../utils/unit.js'
 import { collapseWhitespace, toArbitrary } from '../../utils/value.js'
 import {
@@ -47,23 +48,11 @@ const normalizeShadow = (value: string): string =>
  * because the original had no entry for it; such a value falls through to
  * `opacity-[.5]`.
  */
-const OPACITY_VALUES: ValueTable = Object.freeze({
-  '0': 'opacity-0',
-  '0.05': 'opacity-5',
-  '0.1': 'opacity-10',
-  '0.2': 'opacity-20',
-  '0.25': 'opacity-25',
-  '0.3': 'opacity-30',
-  '0.4': 'opacity-40',
-  '0.5': 'opacity-50',
-  '0.6': 'opacity-60',
-  '0.7': 'opacity-70',
-  '0.75': 'opacity-75',
-  '0.8': 'opacity-80',
-  '0.9': 'opacity-90',
-  '0.95': 'opacity-95',
-  '1': 'opacity-100'
-})
+const OPACITY_VALUES: ValueTable = Object.freeze(
+  Object.fromEntries(
+    Object.entries(OPACITY_STEPS).map(([value, step]) => [value, `opacity-${step}`])
+  )
+)
 
 const MIX_BLEND_MODE = prefixedTable('mix-blend', BLEND_MODES)
 

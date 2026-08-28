@@ -270,3 +270,77 @@ export const TRANSLATE_VALUES: Readonly<Record<string, string>> = Object.freeze(
   '75%': '3/4',
   '100%': 'full'
 })
+
+/** Border widths Tailwind names, shared by the shorthand and the four sides. */
+const BORDER_WIDTHS: Readonly<Record<string, string>> = Object.freeze({
+  '0px': '-0',
+  '2px': '-2',
+  '4px': '-4',
+  '8px': '-8',
+  // The 1px default is the bare utility: `border`, not `border-1`.
+  '1px': ''
+})
+
+/**
+ * Build the `value -> class` table for one border-width property.
+ *
+ * @example buildBorderWidthScale('border-t') // { '0px': 'border-t-0', …, '1px': 'border-t' }
+ */
+export const buildBorderWidthScale = (prefix: string): Readonly<Record<string, string>> =>
+  Object.freeze(
+    Object.fromEntries(
+      Object.entries(BORDER_WIDTHS).map(([value, suffix]) => [value, `${prefix}${suffix}`])
+    )
+  )
+
+/** Opacity ladder: CSS value -> Tailwind suffix, shared by every opacity family. */
+export const OPACITY_STEPS: Readonly<Record<string, string>> = Object.freeze({
+  '0': '0',
+  '0.05': '5',
+  '0.1': '10',
+  '0.2': '20',
+  '0.25': '25',
+  '0.3': '30',
+  '0.4': '40',
+  '0.5': '50',
+  '0.6': '60',
+  '0.7': '70',
+  '0.75': '75',
+  '0.8': '80',
+  '0.9': '90',
+  '0.95': '95',
+  '1': '100'
+})
+
+/**
+ * {@link SIZE_FRACTIONS} without the given keys.
+ *
+ * `100vw` and `100vh` both map to `screen`, but only the axis matching the
+ * property may use it: `width: 100vh` is not `w-screen`, and neither viewport
+ * unit belongs on `top`/`right`/`bottom`/`left` at all. The original expressed
+ * this by deleting keys from a table it rebuilt on every call.
+ */
+export const sizeFractionsWithout = (
+  ...excluded: readonly string[]
+): Readonly<Record<string, string>> =>
+  Object.freeze(
+    Object.fromEntries(
+      Object.entries(SIZE_FRACTIONS).filter(([value]) => !excluded.includes(value))
+    )
+  )
+
+/**
+ * Unitless `line-height` ratios Tailwind names.
+ *
+ * Shared by the version presets and the `line-height` handler: the preset entry
+ * is gated on `useAllDefaultValues`, the handler's is not, and the original
+ * behaved the same way. Keeping one definition stops the two from drifting.
+ */
+export const LINE_HEIGHT_RATIOS: Readonly<Record<string, string>> = Object.freeze({
+  '1': 'leading-none',
+  '2': 'leading-loose',
+  '1.25': 'leading-tight',
+  '1.375': 'leading-snug',
+  '1.5': 'leading-normal',
+  '1.625': 'leading-relaxed'
+})
