@@ -81,6 +81,13 @@ export interface TranslatorConfig {
    * @default 3
    */
   tailwindVersion?: TailwindVersion
+  /**
+   * Emit each rule's classes in Tailwind's recommended order instead of the
+   * order the declarations appeared in. See `sortClassNames`.
+   *
+   * @default false
+   */
+  sortClasses?: boolean
 }
 
 /** Why a declaration, rule or at-rule could not be converted. */

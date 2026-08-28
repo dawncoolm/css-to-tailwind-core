@@ -13,6 +13,8 @@
  */
 
 export { CssToTailwindTranslator, specialAttribute } from './translator.js'
+export { sortClassNames } from './sort.js'
+export type { SortOptions } from './sort.js'
 export { defaultTranslatorConfig } from './convert/context.js'
 export type { ConversionContext } from './convert/context.js'
 export type { ResolvedTheme } from './theme/index.js'

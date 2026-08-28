@@ -48,6 +48,24 @@ const result = CssToTailwindTranslator(`body {
 | `useAllDefaultValues` | `boolean` | `true` | Resolve values against Tailwind's default scales (`1rem` → `p-4`) instead of always emitting arbitrary values (`p-[1rem]`). |
 | `customTheme` | `CustomTheme` | `{}` | Value overrides. Always win, even with `useAllDefaultValues: false`. |
 | `tailwindVersion` | `3 \| 4` | `3` | Which Tailwind major version the class names target. |
+| `sortClasses` | `boolean` | `false` | Emit each rule's classes in Tailwind's recommended order. |
+
+### `sortClassNames(classNames, options?)`
+
+Sorts a class list into Tailwind's recommended order — the order
+`prettier-plugin-tailwindcss` produces — and returns a new array. `options.prefix`
+is Tailwind's configured class prefix, stripped before a class is ranked.
+
+```ts
+import { sortClassNames } from 'css-to-tailwind-core'
+
+sortClassNames(['p-4', 'text-sm', 'flex', 'w-full'])
+// ['flex', 'w-full', 'p-4', 'text-sm']
+```
+
+Unrecognised classes lead the result and arbitrary properties trail it; classes
+sharing a rank keep their input order. `sortClasses: true` applies this to every
+rule the translator returns.
 
 ### Result
 
@@ -247,6 +265,7 @@ src/
   index.ts              public exports
   types.ts              ResultCode, TranslatorConfig, CustomTheme, Diagnostic
   translator.ts         parse -> walk -> convert -> assemble
+  sort.ts               corePlugins order for a class list
   parser/               tokenizer, AST, declaration splitting
   selector/             pseudo -> variant, at-rule -> variant
   convert/

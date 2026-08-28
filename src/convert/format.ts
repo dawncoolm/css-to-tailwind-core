@@ -5,7 +5,8 @@ import type { TailwindVersion } from '../types.js'
 const OPEN_BRACKET = 91
 const HYPHEN = 45
 
-const isArbitrary = (className: string): boolean =>
+/** Whether a class is an arbitrary property (`[caption-side:top]`). */
+export const isArbitraryProperty = (className: string): boolean =>
   className.charCodeAt(0) === OPEN_BRACKET && className.endsWith(']')
 
 /**
@@ -16,7 +17,7 @@ const isArbitrary = (className: string): boolean =>
  */
 const applyImportant = (className: string, version: TailwindVersion): string => {
   if (version === 4) return `${className}!`
-  if (isArbitrary(className)) return `${className.slice(0, -1)}!important]`
+  if (isArbitraryProperty(className)) return `${className.slice(0, -1)}!important]`
   return `!${className}`
 }
 

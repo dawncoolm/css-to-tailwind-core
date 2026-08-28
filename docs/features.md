@@ -64,6 +64,10 @@ Each result's selector carries the at-rules it was nested under, joined with
   `overflow-ellipsis`/`overflow-clip`, `box-decoration-slice`/`box-decoration-clone`
   instead of `decoration-slice`/`decoration-clone`, no `filter`/`backdrop-filter`
   marker classes, and the trailing `!` important marker.
+- **`sortClasses`** — off by default. Turn it on to have each rule's classes come
+  back in Tailwind's recommended order rather than the order the declarations
+  appeared in. `sortClassNames` does the same job for a class list from anywhere
+  else.
 - **`useAllDefaultValues`** — on by default. Turn it off to always emit arbitrary
   values instead of resolving against Tailwind's scales.
 - **`prefix`** — Tailwind's configured class prefix. Applied inside variants and
@@ -74,6 +78,26 @@ Each result's selector carries the at-rules it was nested under, joined with
   sub-functions keyed on the raw function argument and mapped to a class suffix;
   and every other CSS property keyed on the whole declaration value and mapped to
   a complete class name.
+
+## Class ordering
+
+Available as the `sortClasses` option and as a standalone `sortClassNames`
+function. The order is the one `prettier-plugin-tailwindcss` produces: each
+utility sits where its plugin sits in Tailwind's `corePlugins` list, so a class
+list reads layout, then box model, then typography, then visual effects.
+
+- Classes with no variant come first; each variant chain then forms its own
+  block. The blocks run in the order the chains first appear — Prettier instead
+  orders them by Tailwind's own variant order, which needs a second table to no
+  visible benefit here.
+- Classes the ordering does not recognise lead the list, so a project's own class
+  names stay together and stay visible. Arbitrary properties
+  (`[caption-side:top]`) trail it.
+- Classes that share a rank keep the order they came in.
+- One ordering serves both target versions: a utility v4 renamed sits at the same
+  rank as its v3 spelling, so `grow` sorts where `flex-grow` does.
+- Variants, the configured `prefix`, a leading minus sign and the `!important`
+  marker are all seen through, in either version's spelling.
 
 ## `!important`
 

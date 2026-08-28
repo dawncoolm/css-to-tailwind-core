@@ -3,6 +3,7 @@
 import { createContext, type ConversionContext } from './convert/context.js'
 import { convertDeclaration, isKnownProperty } from './convert/declaration.js'
 import { dedupe, formatClasses, splitClasses, variantPrefixOf } from './convert/format.js'
+import { sortClassNames } from './sort.js'
 import type { Declaration } from './parser/declarations.js'
 import { parse, type AtRule, type Node, type Rule } from './parser/parse.js'
 import { resolveAtRule, UNSUPPORTED_AT_RULES } from './selector/media.js'
@@ -126,9 +127,14 @@ export const CssToTailwindTranslator = (
       })
     }
 
+    const deduped = dedupe(classes)
+
     data.push({
       selectorName: [...state.path, selector].join('-->'),
-      resultVal: dedupe(classes).join(' ')
+      resultVal: (ctx.sortClasses
+        ? sortClassNames(deduped, { prefix: ctx.prefix })
+        : deduped
+      ).join(' ')
     })
   }
 

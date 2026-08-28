@@ -19,6 +19,8 @@ export interface ConversionContext {
   readonly version: TailwindVersion
   readonly prefix: string
   readonly useAllDefaultValues: boolean
+  /** Whether {@link sortClassNames} is applied to each rule's class list. */
+  readonly sortClasses: boolean
   /** Raw user overrides. Consulted before `theme`, and regardless of `useAllDefaultValues`. */
   readonly customTheme: CustomTheme
   readonly theme: ResolvedTheme
@@ -33,12 +35,16 @@ export interface ConversionContext {
 }
 
 export const defaultTranslatorConfig: Required<
-  Pick<TranslatorConfig, 'prefix' | 'useAllDefaultValues' | 'customTheme' | 'tailwindVersion'>
+  Pick<
+    TranslatorConfig,
+    'prefix' | 'useAllDefaultValues' | 'customTheme' | 'tailwindVersion' | 'sortClasses'
+  >
 > = {
   prefix: '',
   useAllDefaultValues: true,
   customTheme: {},
-  tailwindVersion: 3
+  tailwindVersion: 3,
+  sortClasses: false
 }
 
 export const createContext = (config: TranslatorConfig = {}): ConversionContext => {
@@ -49,6 +55,7 @@ export const createContext = (config: TranslatorConfig = {}): ConversionContext 
     useAllDefaultValues:
       config.useAllDefaultValues ?? defaultTranslatorConfig.useAllDefaultValues,
     customTheme: config.customTheme ?? defaultTranslatorConfig.customTheme,
+    sortClasses: config.sortClasses ?? defaultTranslatorConfig.sortClasses,
     theme: getPreset(version),
     diagnostics: [],
     memo: new Map()
