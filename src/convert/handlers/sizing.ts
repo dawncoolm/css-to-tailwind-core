@@ -23,10 +23,14 @@ const axisSize = (prefix: string, fractions: Readonly<Record<string, string>>): 
   (value, ctx) => {
     if (!isUnit(value)) return ''
     const laddered = ctx.useAllDefaultValues ? ctx.theme.spacing[value] : undefined
-    const fraction = fractions[normalizeFractionPercentage(value)]
+    // `??` short-circuits, so the percentage regex only runs on a ladder miss.
     // Unlike the original, the arbitrary form is encoded, so `calc(100% - 1rem)`
     // becomes a class name Tailwind can actually parse.
-    return `${prefix}-${laddered ?? fraction ?? `[${toArbitrary(value)}]`}`
+    const suffix =
+      laddered ??
+      fractions[normalizeFractionPercentage(value)] ??
+      `[${toArbitrary(value)}]`
+    return `${prefix}-${suffix}`
   }
 
 const MIN_WIDTH_VALUES: ValueTable = Object.freeze({

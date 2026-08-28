@@ -226,9 +226,9 @@ const transformOrigin: HandlerFn = value => {
 
 /**
  * Tailwind has no `transform-style` utility in either preset, so the declaration
- * is reproduced verbatim. `initial` is listed explicitly because the caller only
- * synthesises `[property:initial]` when the handler declines the value, and
- * keeping it here matches the original byte for byte.
+ * is reproduced verbatim. The `initial` entry is unreachable — `convertDeclaration`
+ * short-circuits `initial` and `inherit` to `[property:value]` before any handler
+ * runs — but it is kept so the table still reads as the full accepted value set.
  */
 const TRANSFORM_STYLE_VALUES = identityTable('transform-style', [
   'flat', 'preserve-3d', 'initial'

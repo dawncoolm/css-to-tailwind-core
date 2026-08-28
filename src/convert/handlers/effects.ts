@@ -9,8 +9,8 @@
  * package did.
  *
  * Tailwind v4 renamed the shadow scale (`shadow-sm` -> `shadow-xs`, and so on).
- * That rename lives in the version preset, so `box-shadow` reads
- * `ctx.theme.boxShadow` rather than branching on `ctx.version` itself.
+ * That rename lives in the version preset, so `box-shadow` reads the preset's
+ * table rather than branching on `ctx.version` itself.
  */
 
 import type { HandlerGroup, ValueTable } from '../registry.js'
@@ -63,7 +63,7 @@ export const effectHandlers: HandlerGroup = {
    * issue #1). The named scale is consulted first now, on both the raw and the
    * whitespace-normalised spelling.
    *
-   * `ctx.theme.boxShadow` carries the version-appropriate names, so v4 yields
+   * The preset table carries the version-appropriate names, so v4 yields
    * `shadow-xs` where v3 yields `shadow-sm` for the same CSS.
    */
   'box-shadow': (value, ctx) => {

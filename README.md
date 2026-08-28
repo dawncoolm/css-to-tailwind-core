@@ -227,9 +227,9 @@ and `dist/` does not reference it.
 
 | sheet | this package | original | |
 | --- | --- | --- | --- |
-| repeated declarations (6500 decls) | 202 ops/s | 96 ops/s | **2.11×** |
-| repeated, `useAllDefaultValues: false` | 226 ops/s | 97 ops/s | **2.32×** |
-| every value unique (4000 decls) | 215 ops/s | 203 ops/s | 1.06× |
+| repeated declarations (6500 decls) | 275 ops/s | 95 ops/s | **2.88×** |
+| repeated, `useAllDefaultValues: false` | 290 ops/s | 95 ops/s | **3.06×** |
+| every value unique (4000 decls) | 232 ops/s | 196 ops/s | 1.18× |
 
 Real stylesheets repeat their declarations heavily, which is where the per-call
 memo and the hoisted lookup tables pay off. On a synthetic sheet where no value

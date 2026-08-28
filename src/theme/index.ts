@@ -18,6 +18,25 @@ export interface ResolvedTheme {
   readonly rotate: Readonly<Record<string, string>>
   readonly skew: Readonly<Record<string, string>>
   readonly translate: Readonly<Record<string, string>>
+  /**
+   * Utilities Tailwind renamed between major versions.
+   *
+   * Handlers read these instead of branching on the version, so a future rename
+   * is one preset entry rather than a new `if` in whichever handler owns it.
+   */
+  readonly utilities: {
+    /** `flex-grow` in v3, `grow` in v4. */
+    readonly grow: string
+    /** `flex-shrink` in v3, `shrink` in v4. */
+    readonly shrink: string
+    /** `outline-none` in v3, `outline-hidden` in v4. */
+    readonly outlineNone: string
+  }
+  /**
+   * Whether a bare `filter` / `backdrop-filter` marker class has to accompany the
+   * individual filter utilities. v3 needs it; v4 dropped it.
+   */
+  readonly filterMarker: boolean
 }
 
 const PRESETS: Readonly<Record<TailwindVersion, ResolvedTheme>> = Object.freeze({

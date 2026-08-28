@@ -35,26 +35,6 @@ const FLEX_SHORTHAND: Readonly<Record<string, string>> = Object.freeze({
 })
 
 /** v3 keeps the legacy `flex-grow` name; v4 only knows `grow`. */
-const FLEX_GROW_V3: Readonly<Record<string, string>> = Object.freeze({
-  '0': 'flex-grow-0',
-  '1': 'flex-grow'
-})
-
-const FLEX_GROW_V4: Readonly<Record<string, string>> = Object.freeze({
-  '0': 'grow-0',
-  '1': 'grow'
-})
-
-const FLEX_SHRINK_V3: Readonly<Record<string, string>> = Object.freeze({
-  '0': 'flex-shrink-0',
-  '1': 'flex-shrink'
-})
-
-const FLEX_SHRINK_V4: Readonly<Record<string, string>> = Object.freeze({
-  '0': 'shrink-0',
-  '1': 'shrink'
-})
-
 /**
  * `order`. Tailwind models the two sentinel positions as `order-first` /
  * `order-last`, which compile to `order: -9999` / `order: 9999`, and `order: 0`
@@ -224,23 +204,22 @@ const flexBasis: HandlerFn = value =>
 /** `flex-flow` has no Tailwind utility; upstream emitted the raw declaration. */
 const flexFlow: HandlerFn = value => `[flex-flow:${toArbitrary(value)}]`
 
-/** `flex-grow`, using the v4 `grow-*` names when targeting v4. */
-const flexGrow: HandlerFn = (value, ctx: ConversionContext) => {
-  if (!isUnit(value)) return ''
-  const isV4 = ctx.version === 4
-  const named = (isV4 ? FLEX_GROW_V4 : FLEX_GROW_V3)[value]
-  if (named) return named
-  return `${isV4 ? 'grow' : 'flex-grow'}-[${toArbitrary(value)}]`
-}
-
-/** `flex-shrink`, using the v4 `shrink-*` names when targeting v4. */
-const flexShrink: HandlerFn = (value, ctx: ConversionContext) => {
-  if (!isUnit(value)) return ''
-  const isV4 = ctx.version === 4
-  const named = (isV4 ? FLEX_SHRINK_V4 : FLEX_SHRINK_V3)[value]
-  if (named) return named
-  return `${isV4 ? 'shrink' : 'flex-shrink'}-[${toArbitrary(value)}]`
-}
+/**
+ * `flex-grow` / `flex-shrink`, which share a shape: `0` and `1` have named
+ * utilities and everything else is arbitrary.
+ *
+ * The utility name comes from the version preset — v4 renamed both to `grow` and
+ * `shrink` — so this handler has no version branch of its own.
+ */
+const flexScale =
+  (kind: 'grow' | 'shrink'): HandlerFn =>
+  (value, ctx: ConversionContext) => {
+    if (!isUnit(value)) return ''
+    const utility = ctx.theme.utilities[kind]
+    if (value === '1') return utility
+    if (value === '0') return `${utility}-0`
+    return `${utility}-[${toArbitrary(value)}]`
+  }
 
 /** `order`, falling back to an arbitrary value for positions off the scale. */
 const order: HandlerFn = value =>
@@ -256,8 +235,8 @@ export const flexboxHandlers: HandlerGroup = {
   'flex-basis': flexBasis,
   'flex-direction': FLEX_DIRECTION,
   'flex-flow': flexFlow,
-  'flex-grow': flexGrow,
-  'flex-shrink': flexShrink,
+  'flex-grow': flexScale('grow'),
+  'flex-shrink': flexScale('shrink'),
   'flex-wrap': FLEX_WRAP,
   order,
   'align-content': ALIGN_CONTENT,

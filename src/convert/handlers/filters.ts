@@ -102,8 +102,13 @@ const lookupNamedUtility = (
   call: string,
   backdrop: boolean
 ): string => {
+  const direct = ctx.theme.filter[call]
+  if (direct !== undefined) return direct
+
+  // Only the spaced spellings need normalising, so this is deferred past the
+  // direct hit rather than computed for every call in the list.
   const compact = call.replace(/\s+/g, '')
-  const named = ctx.theme.filter[call] ?? ctx.theme.filter[compact]
+  const named = ctx.theme.filter[compact]
   if (named !== undefined) return named
   if (!backdrop) return ''
   return BACKDROP_OPACITY_VALUES[call] ?? BACKDROP_OPACITY_VALUES[compact] ?? ''
@@ -158,13 +163,14 @@ const convertFilterList = (
   backdrop: boolean
 ): string => {
   const property = backdrop ? 'backdrop-filter' : 'filter'
-  const arbitrary = `[${property}:${toArbitrary(value)}]`
+  // Built only on the failure paths below, not for every conversion.
+  const arbitrary = (): string => `[${property}:${toArbitrary(value)}]`
   const normalized = collapse(value)
 
   if (normalized === 'none') return `${property}-none`
 
   // v3 needed the marker class to switch the filter variable chain on; v4 does not.
-  const marker = ctx.version === 3 ? `${property} ` : ''
+  const marker = ctx.theme.filterMarker ? `${property} ` : ''
 
   // A few scale entries are multi-call values (`drop-shadow(…) drop-shadow(…)`),
   // so the list as a whole gets one chance to match before it is split apart.
@@ -175,7 +181,7 @@ const convertFilterList = (
   }
 
   const calls = splitTopLevelWhitespace(normalized)
-  if (calls.length === 0) return arbitrary
+  if (calls.length === 0) return arbitrary()
 
   const utilities: string[] = []
   for (const call of calls) {
@@ -192,7 +198,7 @@ const convertFilterList = (
     // trailing space. It now degrades to the arbitrary property like any other
     // unmappable entry.
     const utility = parsed && args !== '' ? utilityForCall(parsed[0], args, ctx, backdrop) : ''
-    if (utility === '') return arbitrary
+    if (utility === '') return arbitrary()
     utilities.push(utility)
   }
 

@@ -181,7 +181,7 @@ const pushUnconvertible = (
   declaration: Declaration,
   selector: string
 ): void => {
-  const known = isKnownProperty(declaration.property)
+  const known = isKnownProperty(declaration.property, ctx)
   ctx.diagnostics.push({
     level: 'warning',
     code: known ? 'unsupported-value' : 'unknown-property',

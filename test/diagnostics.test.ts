@@ -47,6 +47,16 @@ describe('diagnostics', () => {
     expect(result.diagnostics.map(d => d.code)).toContain('unexpected-eof')
   })
 
+  it('does not call a customTheme-only property unknown', () => {
+    const result = CssToTailwindTranslator('.a { made-up-prop: nope }', {
+      customTheme: { 'made-up-prop': { yes: 'is-fine' } }
+    })
+    expect(result.diagnostics[0]).toMatchObject({
+      code: 'unsupported-value',
+      property: 'made-up-prop'
+    })
+  })
+
   it('keeps code OK when only declarations failed', () => {
     const result = CssToTailwindTranslator('.a { not-a-prop: 1 }')
     expect(result.code).toBe('OK')

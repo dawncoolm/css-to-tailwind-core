@@ -58,5 +58,16 @@ const resolve = (property: string, value: string, ctx: ConversionContext): strin
   return runHandler(handler, value, ctx)
 }
 
-/** Whether the registry knows the property at all; picks the diagnostic code. */
-export const isKnownProperty = (property: string): boolean => registry.has(property)
+/**
+ * Whether the property is one this translator knows about at all, which decides
+ * between the `unknown-property` and `unsupported-value` diagnostics.
+ *
+ * Every layer {@link convertDeclaration} consults counts, not just the registry:
+ * a property that only a `customTheme` or a preset table covers is known, and
+ * reporting it as "not a known CSS property" because one of its values failed
+ * would send the caller looking for a typo that is not there.
+ */
+export const isKnownProperty = (property: string, ctx: ConversionContext): boolean =>
+  registry.has(property) ||
+  ctx.customTheme[property] !== undefined ||
+  ctx.theme.defaults[property] !== undefined

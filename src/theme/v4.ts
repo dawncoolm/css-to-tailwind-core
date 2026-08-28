@@ -71,5 +71,11 @@ export const V4_PRESET = Object.freeze({
   ...V3_PRESET,
   defaults: DEFAULT_VALUES_V4,
   radius: RADIUS_SCALE_V4,
-  filter: FILTER_SCALE_V4
+  filter: FILTER_SCALE_V4,
+  utilities: Object.freeze({
+    grow: 'grow',
+    shrink: 'shrink',
+    outlineNone: 'outline-hidden'
+  }),
+  filterMarker: false
 })

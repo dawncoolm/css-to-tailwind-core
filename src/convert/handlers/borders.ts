@@ -173,7 +173,7 @@ const borderRadius: HandlerFn = (value, ctx) => {
  * in v3, `outline-hidden` in v4.
  */
 const outlineStyle: HandlerFn = (value, ctx) => {
-  if (value === 'none') return ctx.version === 4 ? 'outline-hidden' : 'outline-none'
+  if (value === 'none') return ctx.theme.utilities.outlineNone
   return OUTLINE_STYLE[value] ?? ''
 }
 

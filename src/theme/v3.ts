@@ -180,5 +180,11 @@ export const V3_PRESET = Object.freeze({
   scale: SCALE_VALUES,
   rotate: ROTATE_VALUES,
   skew: SKEW_VALUES,
-  translate: TRANSLATE_VALUES
+  translate: TRANSLATE_VALUES,
+  utilities: Object.freeze({
+    grow: 'flex-grow',
+    shrink: 'flex-shrink',
+    outlineNone: 'outline-none'
+  }),
+  filterMarker: true
 })
