@@ -31,6 +31,14 @@ export interface ResolvedTheme {
     readonly shrink: string
     /** `outline-none` in v3, `outline-hidden` in v4. */
     readonly outlineNone: string
+    /** `overflow-ellipsis` in v3, `text-ellipsis` in v4. */
+    readonly textEllipsis: string
+    /** `overflow-clip` in v3, `text-clip` in v4. */
+    readonly textClip: string
+    /** `decoration-slice` in v3, `box-decoration-slice` in v4. */
+    readonly decorationSlice: string
+    /** `decoration-clone` in v3, `box-decoration-clone` in v4. */
+    readonly decorationClone: string
   }
   /**
    * Whether a bare `filter` / `backdrop-filter` marker class has to accompany the

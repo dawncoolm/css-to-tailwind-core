@@ -106,10 +106,13 @@ const Z_INDEX_VALUES: ValueTable = Object.freeze({
 export const layoutHandlers: HandlerGroup = {
   'aspect-ratio': arbitraryProperty('aspect-ratio'),
 
-  'box-decoration-break': {
-    slice: 'decoration-slice',
-    clone: 'decoration-clone'
-  },
+  // v4 renamed both to `box-decoration-*`, so the class comes from the preset.
+  'box-decoration-break': (value, ctx) =>
+    value === 'slice'
+      ? ctx.theme.utilities.decorationSlice
+      : value === 'clone'
+        ? ctx.theme.utilities.decorationClone
+        : '',
 
   'box-sizing': {
     'border-box': 'box-border',

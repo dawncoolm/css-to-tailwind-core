@@ -66,4 +66,33 @@ describe('tailwindVersion: 4', () => {
     expect(v3('.a { caption-side: top !important }')).toBe('[caption-side:top!important]')
     expect(v4('.a { caption-side: top !important }')).toBe('[caption-side:top]!')
   })
+
+  it('renames the text-overflow utilities', () => {
+    expect(v3('.a { text-overflow: ellipsis }')).toBe('overflow-ellipsis')
+    expect(v4('.a { text-overflow: ellipsis }')).toBe('text-ellipsis')
+    expect(v3('.a { text-overflow: clip }')).toBe('overflow-clip')
+    expect(v4('.a { text-overflow: clip }')).toBe('text-clip')
+  })
+
+  it('renames the box-decoration-break utilities', () => {
+    expect(v3('.a { box-decoration-break: slice }')).toBe('decoration-slice')
+    expect(v4('.a { box-decoration-break: slice }')).toBe('box-decoration-slice')
+    expect(v3('.a { box-decoration-break: clone }')).toBe('decoration-clone')
+    expect(v4('.a { box-decoration-break: clone }')).toBe('box-decoration-clone')
+  })
+
+  /*
+   * These two renames live in the preset's `utilities` map, which handlers read
+   * unconditionally, rather than in `defaults`, whose lookup `convertDeclaration`
+   * gates on `useAllDefaultValues`. Moving them into `defaults` would look tidier
+   * and would silently emit v3 names under v4 for anyone who turned that flag off.
+   */
+  it('keeps the v4 names when default value tables are disabled', () => {
+    const off = (css: string): string =>
+      CssToTailwindTranslator(css, { tailwindVersion: 4, useAllDefaultValues: false }).data[0]
+        ?.resultVal ?? ''
+
+    expect(off('.a { text-overflow: ellipsis }')).toBe('text-ellipsis')
+    expect(off('.a { box-decoration-break: slice }')).toBe('box-decoration-slice')
+  })
 })

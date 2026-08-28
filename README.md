@@ -163,6 +163,9 @@ Pass `tailwindVersion: 4` to emit v4 class names.
 | `filter: blur(4px)` | `filter blur-sm` | `blur-xs` |
 | `filter: grayscale(1)` | `filter grayscale` | `grayscale` |
 | `outline-style: none` | `outline-none` | `outline-hidden` |
+| `text-overflow: ellipsis` | `overflow-ellipsis` | `text-ellipsis` |
+| `text-overflow: clip` | `overflow-clip` | `text-clip` |
+| `box-decoration-break: slice` | `decoration-slice` | `box-decoration-slice` |
 | `display: flex !important` | `!flex` | `flex!` |
 
 The default is `3`, so upgrading from `css-to-tailwind-translator` changes nothing

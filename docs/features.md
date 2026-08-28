@@ -60,8 +60,10 @@ Each result's selector carries the at-rules it was nested under, joined with
 - **`tailwindVersion`** — `3` (default) or `4`. Selects which generation of class
   names to emit: `grow`/`shrink` instead of `flex-grow`/`flex-shrink`, the
   shifted shadow, radius and blur scales, `outline-hidden` instead of
-  `outline-none`, no `filter`/`backdrop-filter` marker classes, and the trailing
-  `!` important marker.
+  `outline-none`, `text-ellipsis`/`text-clip` instead of
+  `overflow-ellipsis`/`overflow-clip`, `box-decoration-slice`/`box-decoration-clone`
+  instead of `decoration-slice`/`decoration-clone`, no `filter`/`backdrop-filter`
+  marker classes, and the trailing `!` important marker.
 - **`useAllDefaultValues`** — on by default. Turn it off to always emit arbitrary
   values instead of resolving against Tailwind's scales.
 - **`prefix`** — Tailwind's configured class prefix. Applied inside variants and

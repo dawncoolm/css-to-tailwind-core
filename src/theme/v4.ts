@@ -11,6 +11,9 @@
  * - radius scale shifted down one step, `rounded-4xl` added
  * - blur scale shifted down one step, `blur-xs` added
  * - `outline-none` -> `outline-hidden`
+ * - `overflow-ellipsis`/`overflow-clip` -> `text-ellipsis`/`text-clip` (renamed in
+ *   3.3, the `overflow-*` aliases dropped in v4)
+ * - `decoration-slice`/`decoration-clone` -> `box-decoration-slice`/`box-decoration-clone`
  * - the bare `transform` / `filter` / `backdrop-filter` marker classes are gone
  */
 
@@ -75,7 +78,11 @@ export const V4_PRESET = Object.freeze({
   utilities: Object.freeze({
     grow: 'grow',
     shrink: 'shrink',
-    outlineNone: 'outline-hidden'
+    outlineNone: 'outline-hidden',
+    textEllipsis: 'text-ellipsis',
+    textClip: 'text-clip',
+    decorationSlice: 'box-decoration-slice',
+    decorationClone: 'box-decoration-clone'
   }),
   filterMarker: false
 })

@@ -184,7 +184,11 @@ export const V3_PRESET = Object.freeze({
   utilities: Object.freeze({
     grow: 'flex-grow',
     shrink: 'flex-shrink',
-    outlineNone: 'outline-none'
+    outlineNone: 'outline-none',
+    textEllipsis: 'overflow-ellipsis',
+    textClip: 'overflow-clip',
+    decorationSlice: 'decoration-slice',
+    decorationClone: 'decoration-clone'
   }),
   filterMarker: true
 })

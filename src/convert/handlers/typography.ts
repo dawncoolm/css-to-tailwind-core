@@ -93,15 +93,14 @@ const LIST_STYLE_TYPES: ValueTable = Object.freeze({
 })
 
 /**
- * Tailwind v3's `text-overflow` utilities.
+ * `text-overflow` values, keyed to the preset entry that names the utility.
  *
- * Kept at the v3 spelling for both target versions, matching the original.
  * Tailwind renamed these to `text-ellipsis` / `text-clip` in 3.3 and dropped the
- * `overflow-*` aliases in v4, but that rename is out of scope here.
+ * `overflow-*` aliases in v4, so the class name depends on the target version.
  */
-const TEXT_OVERFLOWS: ValueTable = Object.freeze({
-  ellipsis: 'overflow-ellipsis',
-  clip: 'overflow-clip'
+const TEXT_OVERFLOWS: Readonly<Record<string, 'textEllipsis' | 'textClip'>> = Object.freeze({
+  ellipsis: 'textEllipsis',
+  clip: 'textClip'
 })
 
 const OVERFLOW_WRAPS: ValueTable = Object.freeze({
@@ -253,8 +252,10 @@ export const typographyHandlers: HandlerGroup = {
   /** Non-standard, long-dead property; kept because the original mapped it. */
   'text-outline': arbitraryProperty('text-outline'),
 
-  'text-overflow': value =>
-    TEXT_OVERFLOWS[value] ?? `[text-overflow:${toArbitrary(value)}]`,
+  'text-overflow': (value, ctx) => {
+    const utility = TEXT_OVERFLOWS[value]
+    return utility ? ctx.theme.utilities[utility] : `[text-overflow:${toArbitrary(value)}]`
+  },
 
   'text-shadow': arbitraryProperty('text-shadow'),
 
