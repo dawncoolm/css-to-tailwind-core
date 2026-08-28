@@ -163,6 +163,21 @@ export const RADIUS_SCALE_V4: Readonly<Record<string, string>> = Object.freeze({
   '9999px': '-full'
 })
 
+/** Font weight ladder: CSS value -> Tailwind utility. Shared by v3 and v4. */
+export const FONT_WEIGHT_SCALE: Readonly<Record<string, string>> = Object.freeze({
+  '100': 'font-thin',
+  '200': 'font-extralight',
+  '300': 'font-light',
+  '400': 'font-normal',
+  '500': 'font-medium',
+  '600': 'font-semibold',
+  '700': 'font-bold',
+  '800': 'font-extrabold',
+  '900': 'font-black',
+  normal: 'font-normal',
+  bold: 'font-bold'
+})
+
 /** `font-size` scale, which the original package never consulted (issue #12). */
 export const FONT_SIZE_SCALE: Readonly<Record<string, string>> = Object.freeze({
   '0.75rem': 'text-xs',

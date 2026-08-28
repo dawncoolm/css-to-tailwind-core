@@ -3,6 +3,7 @@
 import {
   BOX_SHADOW_SCALE_V3,
   FONT_SIZE_SCALE,
+  FONT_WEIGHT_SCALE,
   LINE_HEIGHT_RATIOS,
   INSET_FRACTIONS,
   MEDIA_BREAKPOINTS,
@@ -129,19 +130,7 @@ export const DEFAULT_VALUES_V3: Readonly<
     'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace':
       'font-mono'
   }),
-  'font-weight': Object.freeze({
-    '100': 'font-thin',
-    '200': 'font-extralight',
-    '300': 'font-light',
-    '400': 'font-normal',
-    '500': 'font-medium',
-    '600': 'font-semibold',
-    '700': 'font-bold',
-    '800': 'font-extrabold',
-    '900': 'font-black',
-    normal: 'font-normal',
-    bold: 'font-bold'
-  }),
+  'font-weight': FONT_WEIGHT_SCALE,
   'line-height': Object.freeze({
     '.75rem': 'leading-3',
     '0.75rem': 'leading-3',

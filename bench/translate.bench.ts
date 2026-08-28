@@ -79,6 +79,18 @@ describe('unique declarations (500 rules, 4000 declarations)', () => {
   })
 })
 
+describe('repeated declarations, class sorting on', () => {
+  // The original package has no equivalent, so this is measured against the
+  // unsorted path: the gap is what `sortClasses: true` costs a caller.
+  bench('css-to-tailwind-core, sortClasses', () => {
+    CssToTailwindTranslator(REPEATED, { sortClasses: true })
+  })
+
+  bench('css-to-tailwind-core, unsorted', () => {
+    CssToTailwindTranslator(REPEATED)
+  })
+})
+
 describe('repeated declarations, no default value tables', () => {
   bench('css-to-tailwind-core', () => {
     CssToTailwindTranslator(REPEATED, { useAllDefaultValues: false })

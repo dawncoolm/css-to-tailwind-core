@@ -11,6 +11,8 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
 import { CssToTailwindTranslator, sortClassNames } from '../src/index.js'
+import { V3_PRESET } from '../src/theme/v3.js'
+import { V4_PRESET } from '../src/theme/v4.js'
 
 describe('sortClassNames', () => {
   it('puts a typical class list in the recommended order', () => {
@@ -178,6 +180,24 @@ describe('order table coverage', () => {
 
   it('covers the corpus', () => {
     expect(emitted.size).toBeGreaterThan(500)
+  })
+
+  /*
+   * A rename is a four-place edit: the `utilities` interface, both presets, and
+   * the order table. The corpus cannot police the fourth — it holds no
+   * `text-overflow` or `box-decoration-break` declaration — so the presets do.
+   */
+  it('ranks both spellings of every renamed utility identically', () => {
+    for (const key of Object.keys(V3_PRESET.utilities) as (keyof typeof V3_PRESET.utilities)[]) {
+      const v3 = V3_PRESET.utilities[key]
+      const v4 = V4_PRESET.utilities[key]
+
+      expect(sortClassNames(['container', v3]), `${key} (v3: ${v3})`).toEqual(['container', v3])
+      expect(sortClassNames(['container', v4]), `${key} (v4: ${v4})`).toEqual(['container', v4])
+      expect(sortClassNames([v4, 'p-4']), `${key}`).toEqual(sortClassNames([v3, 'p-4']).map(
+        className => (className === v3 ? v4 : className)
+      ))
+    }
   })
 
   it('recognises every class the translator emits', () => {

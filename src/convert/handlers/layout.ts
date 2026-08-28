@@ -99,6 +99,31 @@ const Z_INDEX_VALUES: ValueTable = Object.freeze({
   auto: 'z-auto'
 })
 
+/** `display` values, exported because the class sorter needs the utility names. */
+export const DISPLAY_VALUES: ValueTable = Object.freeze({
+  block: 'block',
+  'inline-block': 'inline-block',
+  inline: 'inline',
+  flex: 'flex',
+  'inline-flex': 'inline-flex',
+  table: 'table',
+  'inline-table': 'inline-table',
+  'table-caption': 'table-caption',
+  'table-cell': 'table-cell',
+  'table-column': 'table-column',
+  'table-column-group': 'table-column-group',
+  'table-footer-group': 'table-footer-group',
+  'table-header-group': 'table-header-group',
+  'table-row-group': 'table-row-group',
+  'table-row': 'table-row',
+  'flow-root': 'flow-root',
+  grid: 'grid',
+  'inline-grid': 'inline-grid',
+  contents: 'contents',
+  'list-item': 'list-item',
+  none: 'hidden'
+})
+
 /* -------------------------------------------------------------------------- */
 /* Group                                                                       */
 /* -------------------------------------------------------------------------- */
@@ -106,13 +131,12 @@ const Z_INDEX_VALUES: ValueTable = Object.freeze({
 export const layoutHandlers: HandlerGroup = {
   'aspect-ratio': arbitraryProperty('aspect-ratio'),
 
-  // v4 renamed both to `box-decoration-*`, so the class comes from the preset.
-  'box-decoration-break': (value, ctx) =>
-    value === 'slice'
-      ? ctx.theme.utilities.decorationSlice
-      : value === 'clone'
-        ? ctx.theme.utilities.decorationClone
-        : '',
+  /** v4 renamed both to `box-decoration-*`, so the class comes from the preset. */
+  'box-decoration-break': (value, ctx) => {
+    if (value === 'slice') return ctx.theme.utilities.decorationSlice
+    if (value === 'clone') return ctx.theme.utilities.decorationClone
+    return ''
+  },
 
   'box-sizing': {
     'border-box': 'box-border',
@@ -149,29 +173,7 @@ export const layoutHandlers: HandlerGroup = {
   'contain-intrinsic-size': arbitraryProperty('contain-intrinsic-size'),
   'content-visibility': arbitraryProperty('content-visibility'),
 
-  display: {
-    block: 'block',
-    'inline-block': 'inline-block',
-    inline: 'inline',
-    flex: 'flex',
-    'inline-flex': 'inline-flex',
-    table: 'table',
-    'inline-table': 'inline-table',
-    'table-caption': 'table-caption',
-    'table-cell': 'table-cell',
-    'table-column': 'table-column',
-    'table-column-group': 'table-column-group',
-    'table-footer-group': 'table-footer-group',
-    'table-header-group': 'table-header-group',
-    'table-row-group': 'table-row-group',
-    'table-row': 'table-row',
-    'flow-root': 'flow-root',
-    grid: 'grid',
-    'inline-grid': 'inline-grid',
-    contents: 'contents',
-    'list-item': 'list-item',
-    none: 'hidden'
-  },
+  display: DISPLAY_VALUES,
 
   float: {
     right: 'float-right',

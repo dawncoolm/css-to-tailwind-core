@@ -12,8 +12,10 @@
  */
 
 import { isArbitraryProperty } from './convert/format.js'
+import { DISPLAY_VALUES } from './convert/handlers/layout.js'
+import { FONT_SIZE_SCALE, FONT_WEIGHT_SCALE, buildBorderWidthScale } from './theme/scales.js'
 import { isLength, isNumber } from './utils/unit.js'
-import { splitTopLevel } from './utils/value.js'
+import { hasNegative, splitTopLevel } from './utils/value.js'
 
 /**
  * One rank in the ordering.
@@ -27,35 +29,22 @@ interface OrderGroup {
   readonly prefixes?: readonly string[]
 }
 
-const DISPLAY = [
-  'block', 'inline-block', 'inline', 'flex', 'inline-flex', 'table', 'inline-table',
-  'table-caption', 'table-cell', 'table-column', 'table-column-group', 'table-footer-group',
-  'table-header-group', 'table-row-group', 'table-row', 'flow-root', 'grid', 'inline-grid',
-  'contents', 'list-item', 'hidden'
-]
+/*
+ * Scale members are read from the tables that define them rather than retyped.
+ * A hand-copied list that falls behind does not fail loudly: the missing class
+ * still matches its family's catch-all prefix, so `text-10xl` would quietly rank
+ * as a colour rather than a font size.
+ */
+const DISPLAY = Object.values(DISPLAY_VALUES)
+const FONT_SIZES = Object.values(FONT_SIZE_SCALE)
+const FONT_WEIGHTS = Object.values(FONT_WEIGHT_SCALE)
 
 const BORDER_SIDES = ['x', 'y', 's', 'e', 't', 'r', 'b', 'l']
-const BORDER_WIDTH_STEPS = ['0', '2', '4', '8']
 
 /** `border`, `border-2`, `border-t`, `border-t-2`, … — every non-arbitrary width. */
-const BORDER_WIDTHS = [
-  'border',
-  ...BORDER_WIDTH_STEPS.map(step => `border-${step}`),
-  ...BORDER_SIDES.flatMap(side => [
-    `border-${side}`,
-    ...BORDER_WIDTH_STEPS.map(step => `border-${side}-${step}`)
-  ])
-]
-
-const FONT_SIZES = [
-  'text-xs', 'text-sm', 'text-base', 'text-lg', 'text-xl', 'text-2xl', 'text-3xl', 'text-4xl',
-  'text-5xl', 'text-6xl', 'text-7xl', 'text-8xl', 'text-9xl'
-]
-
-const FONT_WEIGHTS = [
-  'font-thin', 'font-extralight', 'font-light', 'font-normal', 'font-medium', 'font-semibold',
-  'font-bold', 'font-extrabold', 'font-black'
-]
+const BORDER_WIDTHS = ['border', ...BORDER_SIDES.map(side => `border-${side}`)].flatMap(prefix =>
+  Object.values(buildBorderWidthScale(prefix))
+)
 
 /**
  * The ordering itself, one entry per Tailwind core plugin, in `corePlugins` order.
@@ -218,13 +207,6 @@ const ORDER: readonly OrderGroup[] = [
 const UNKNOWN_RANK = -1
 const ARBITRARY_PROPERTY_RANK = ORDER.length
 
-const rankOfGroup = (name: string): number => {
-  for (let i = 0; i < ORDER.length; i++) {
-    if (ORDER[i]?.exact?.includes(name) === true) return i
-  }
-  return UNKNOWN_RANK
-}
-
 const EXACT_RANKS = new Map<string, number>()
 for (let rank = 0; rank < ORDER.length; rank++) {
   for (const name of ORDER[rank]?.exact ?? []) {
@@ -232,10 +214,36 @@ for (let rank = 0; rank < ORDER.length; rank++) {
   }
 }
 
-/** Longest prefix first, so a more specific family always wins. */
-const PREFIX_RANKS: readonly (readonly [string, number])[] = ORDER.flatMap((group, rank) =>
-  (group.prefixes ?? []).map(prefix => [prefix, rank] as const)
-).sort((a, b) => b[0].length - a[0].length)
+/**
+ * Prefixes bucketed on the segment before their first `-`, longest first within
+ * a bucket so a more specific family still wins (`justify-items-` over
+ * `justify-`). One flat list would be scanned end to end for every class, and
+ * ordering it longest-first puts the commonest prefixes — `w-`, `h-`, `p-` —
+ * at the far end of it.
+ */
+const bucketOf = (name: string): string => {
+  const hyphen = name.indexOf('-')
+  return hyphen === -1 ? name : name.slice(0, hyphen)
+}
+
+const PREFIX_BUCKETS = new Map<string, [string, number][]>()
+for (let rank = 0; rank < ORDER.length; rank++) {
+  for (const prefix of ORDER[rank]?.prefixes ?? []) {
+    const bucket = PREFIX_BUCKETS.get(bucketOf(prefix))
+    if (bucket) bucket.push([prefix, rank])
+    else PREFIX_BUCKETS.set(bucketOf(prefix), [[prefix, rank]])
+  }
+}
+for (const bucket of PREFIX_BUCKETS.values()) {
+  bucket.sort((a, b) => b[0].length - a[0].length)
+}
+
+const prefixRankOf = (name: string): number => {
+  for (const [prefix, rank] of PREFIX_BUCKETS.get(bucketOf(name)) ?? []) {
+    if (name.startsWith(prefix)) return rank
+  }
+  return UNKNOWN_RANK
+}
 
 /*
  * Families whose suffix decides which plugin a class belongs to. `text-[14px]`
@@ -243,13 +251,13 @@ const PREFIX_RANKS: readonly (readonly [string, number])[] = ORDER.flatMap((grou
  * `border-[#eee]` a colour. Only a length can be the size or the width, so one
  * predicate splits each pair.
  */
-const FONT_SIZE_RANK = rankOfGroup('text-xs')
-const TEXT_COLOR_RANK = PREFIX_RANKS.find(([prefix]) => prefix === 'text-')?.[1] ?? UNKNOWN_RANK
-const FONT_FAMILY_RANK = rankOfGroup('font-sans')
-const FONT_WEIGHT_RANK = rankOfGroup('font-bold')
-const BORDER_WIDTH_RANK = rankOfGroup('border')
-const BORDER_COLOR_RANK = PREFIX_RANKS.find(([prefix]) => prefix === 'border-')?.[1] ?? UNKNOWN_RANK
-const CONTENT_RANK = PREFIX_RANKS.find(([prefix]) => prefix === 'content-[')?.[1] ?? UNKNOWN_RANK
+const exactRankOf = (name: string): number => EXACT_RANKS.get(name) ?? UNKNOWN_RANK
+
+const FONT_SIZE_RANK = exactRankOf('text-xs')
+const FONT_WEIGHT_RANK = exactRankOf('font-bold')
+const BORDER_WIDTH_RANK = exactRankOf('border')
+/** `border-t-[#f00]` would otherwise be claimed by the longer `border-t-` width prefix. */
+const BORDER_COLOR_RANK = prefixRankOf('border-')
 
 const BORDER_SIDE_ARBITRARY = /^border-[xystrbl]-\[/
 
@@ -260,17 +268,20 @@ const arbitraryValueOf = (name: string): string | null => {
   return name.slice(open + 1, -1)
 }
 
-const ambiguousRank = (name: string): number | null => {
-  if (name.startsWith('content-[')) return CONTENT_RANK
-
+/**
+ * Only the length branches need naming. When the value is not a length the class
+ * belongs to its family's catch-all prefix — `text-`, `font-`, `border-` — which
+ * is where the ordinary prefix lookup would put it anyway, so those fall through.
+ */
+const lengthRankOf = (name: string): number | null => {
   if (name.startsWith('text-[')) {
     const value = arbitraryValueOf(name)
-    return value !== null && isLength(value) ? FONT_SIZE_RANK : TEXT_COLOR_RANK
+    return value !== null && isLength(value) ? FONT_SIZE_RANK : null
   }
 
   if (name.startsWith('font-[')) {
     const value = arbitraryValueOf(name)
-    return value !== null && isNumber(value) ? FONT_WEIGHT_RANK : FONT_FAMILY_RANK
+    return value !== null && isNumber(value) ? FONT_WEIGHT_RANK : null
   }
 
   if (name.startsWith('border-[') || BORDER_SIDE_ARBITRARY.test(name)) {
@@ -287,14 +298,7 @@ const rankOf = (name: string): number => {
   const exact = EXACT_RANKS.get(name)
   if (exact !== undefined) return exact
 
-  const ambiguous = ambiguousRank(name)
-  if (ambiguous !== null) return ambiguous
-
-  for (const [prefix, rank] of PREFIX_RANKS) {
-    if (name.startsWith(prefix)) return rank
-  }
-
-  return UNKNOWN_RANK
+  return lengthRankOf(name) ?? prefixRankOf(name)
 }
 
 export interface SortOptions {
@@ -307,7 +311,6 @@ interface RankedClass {
   /** Everything up to the last top-level `:`, `''` when the class has no variants. */
   readonly variants: string
   readonly rank: number
-  readonly index: number
 }
 
 /**
@@ -317,18 +320,25 @@ interface RankedClass {
  * important marker (leading in v3, trailing in v4), then a leading minus sign,
  * then the configured prefix.
  */
-const rankClass = (className: string, prefix: string, index: number): RankedClass => {
-  const parts = splitTopLevel(className, ':')
-  let name = parts[parts.length - 1] as string
-  const variants = parts.slice(0, -1).join(':')
+const rankClass = (className: string, prefix: string): RankedClass => {
+  let name = className
+  let variants = ''
+
+  // Nothing Figma or a plain stylesheet produces carries a variant, and
+  // `splitTopLevel` walks the string by hand once a class contains brackets.
+  if (className.indexOf(':') !== -1) {
+    const parts = splitTopLevel(className, ':')
+    name = parts[parts.length - 1] as string
+    variants = parts.slice(0, -1).join(':')
+  }
 
   if (name.startsWith('!')) name = name.slice(1)
   else if (name.endsWith('!')) name = name.slice(0, -1)
 
-  if (name.startsWith('-')) name = name.slice(1)
+  name = hasNegative(name)[1]
   if (prefix !== '' && name.startsWith(prefix)) name = name.slice(prefix.length)
 
-  return { className, variants, rank: rankOf(name), index }
+  return { className, variants, rank: rankOf(name) }
 }
 
 /**
@@ -346,7 +356,7 @@ export const sortClassNames = (
   options: SortOptions = {}
 ): string[] => {
   const prefix = options.prefix ?? ''
-  const ranked = classNames.map((className, index) => rankClass(className, prefix, index))
+  const ranked = classNames.map(className => rankClass(className, prefix))
 
   // Variant blocks are ordered by first appearance; the unprefixed block leads.
   const variantOrder = new Map<string, number>([['', 0]])
@@ -354,15 +364,12 @@ export const sortClassNames = (
     if (!variantOrder.has(item.variants)) variantOrder.set(item.variants, variantOrder.size)
   }
 
+  // `sort` has been stable since ES2019, which is what keeps one rank in input order.
   return ranked
-    .slice()
     .sort((a, b) => {
       const byVariant =
         (variantOrder.get(a.variants) as number) - (variantOrder.get(b.variants) as number)
-      if (byVariant !== 0) return byVariant
-      if (a.rank !== b.rank) return a.rank - b.rank
-      // Explicit, rather than relying on the sort being stable.
-      return a.index - b.index
+      return byVariant !== 0 ? byVariant : a.rank - b.rank
     })
     .map(item => item.className)
 }
