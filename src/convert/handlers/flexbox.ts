@@ -19,6 +19,7 @@ import type { ConversionContext } from '../context.js'
 import type { HandlerFn, HandlerGroup } from '../registry.js'
 import { isUnit } from '../../utils/unit.js'
 import { toArbitrary } from '../../utils/value.js'
+import { identityTable } from './shared.js'
 
 /* ------------------------------------------------------------------------- *
  * Lookup tables. All hoisted to module scope and frozen so that no handler
@@ -178,44 +179,21 @@ const FLEX_WRAP: Readonly<Record<string, string>> = Object.freeze({
  * intent is unambiguous and the values are corrected here. The key set is
  * unchanged.
  */
-const BOX_ALIGN: Readonly<Record<string, string>> = Object.freeze({
-  initial: '[box-align:initial]',
-  start: '[box-align:start]',
-  end: '[box-align:end]',
-  center: '[box-align:center]',
-  baseline: '[box-align:baseline]',
-  stretch: '[box-align:stretch]'
-})
+const BOX_ALIGN = identityTable('box-align', [
+  'initial', 'start', 'end', 'center', 'baseline', 'stretch'
+])
 
-const BOX_DIRECTION: Readonly<Record<string, string>> = Object.freeze({
-  initial: '[box-direction:initial]',
-  normal: '[box-direction:normal]',
-  reverse: '[box-direction:reverse]',
-  inherit: '[box-direction:inherit]'
-})
+const BOX_DIRECTION = identityTable('box-direction', [
+  'initial', 'normal', 'reverse', 'inherit'
+])
 
-const BOX_LINES: Readonly<Record<string, string>> = Object.freeze({
-  single: '[box-lines:single]',
-  multiple: '[box-lines:multiple]',
-  initial: '[box-lines:initial]'
-})
+const BOX_LINES = identityTable('box-lines', ['single', 'multiple', 'initial'])
 
-const BOX_ORIENT: Readonly<Record<string, string>> = Object.freeze({
-  horizontal: '[box-orient:horizontal]',
-  vertical: '[box-orient:vertical]',
-  'inline-axis': '[box-orient:inline-axis]',
-  'block-axis': '[box-orient:block-axis]',
-  inherit: '[box-orient:inherit]',
-  initial: '[box-orient:initial]'
-})
+const BOX_ORIENT = identityTable('box-orient', [
+  'horizontal', 'vertical', 'inline-axis', 'block-axis', 'inherit', 'initial'
+])
 
-const BOX_PACK: Readonly<Record<string, string>> = Object.freeze({
-  start: '[box-pack:start]',
-  end: '[box-pack:end]',
-  center: '[box-pack:center]',
-  justify: '[box-pack:justify]',
-  initial: '[box-pack:initial]'
-})
+const BOX_PACK = identityTable('box-pack', ['start', 'end', 'center', 'justify', 'initial'])
 
 /* ------------------------------------------------------------------------- *
  * Handlers

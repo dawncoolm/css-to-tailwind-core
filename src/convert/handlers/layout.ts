@@ -8,10 +8,15 @@
 
 import type { HandlerFn, HandlerGroup, ValueTable } from '../registry.js'
 
-import { isColor } from '../../utils/color.js'
 import { isNumber, isUnit, isVar } from '../../utils/unit.js'
 import { hasNegative, toArbitrary } from '../../utils/value.js'
 import { SIZE_FRACTIONS } from '../../theme/scales.js'
+import {
+  arbitraryColorProperty,
+  arbitraryLengthProperty as arbitraryLength,
+  arbitraryProperty,
+  identityTable
+} from './shared.js'
 
 /* -------------------------------------------------------------------------- */
 /* Shared handler shapes                                                       */
@@ -23,22 +28,12 @@ import { SIZE_FRACTIONS } from '../../theme/scales.js'
  * Built once per property at module scope; the original allocated the closure
  * and the arbitrary string on every call.
  */
-const arbitraryProperty =
-  (property: string): HandlerFn =>
-  (value: string): string =>
-    `[${property}:${toArbitrary(value)}]`
-
 /**
  * Emit `[property:value]` only for values that read as a dimension.
  *
  * The original guarded these with `isUnit`, which always returned `true`. The
  * guard is real now, so `column-width: potato` correctly yields nothing.
  */
-const arbitraryLength =
-  (property: string): HandlerFn =>
-  (value: string): string =>
-    isUnit(value) ? `[${property}:${toArbitrary(value)}]` : ''
-
 /* -------------------------------------------------------------------------- */
 /* Insets                                                                      */
 /* -------------------------------------------------------------------------- */
@@ -147,32 +142,18 @@ export const layoutHandlers: HandlerGroup = {
   columns: arbitraryProperty('columns'),
   'column-count': arbitraryProperty('column-count'),
 
-  'column-fill': {
-    balance: '[column-fill:balance]',
-    auto: '[column-fill:auto]',
-    initial: '[column-fill:initial]'
-  },
+  'column-fill': identityTable('column-fill', ['balance', 'auto', 'initial']),
 
   'column-span': arbitraryProperty('column-span'),
   'column-width': arbitraryLength('column-width'),
   'column-rule': arbitraryProperty('column-rule'),
 
-  'column-rule-color': (value: string): string =>
-    isColor(value, true) ? `[column-rule-color:${toArbitrary(value)}]` : '',
+  'column-rule-color': arbitraryColorProperty('column-rule-color'),
 
-  'column-rule-style': {
-    none: '[column-rule-style:none]',
-    hidden: '[column-rule-style:hidden]',
-    dotted: '[column-rule-style:dotted]',
-    dashed: '[column-rule-style:dashed]',
-    solid: '[column-rule-style:solid]',
-    double: '[column-rule-style:double]',
-    groove: '[column-rule-style:groove]',
-    ridge: '[column-rule-style:ridge]',
-    inset: '[column-rule-style:inset]',
-    outset: '[column-rule-style:outset]',
-    initial: '[column-rule-style:initial]'
-  },
+  'column-rule-style': identityTable('column-rule-style', [
+    'none', 'hidden', 'dotted', 'dashed', 'solid', 'double', 'groove', 'ridge', 'inset', 'outset',
+    'initial'
+  ]),
 
   'column-rule-width': arbitraryLength('column-rule-width'),
 
@@ -293,30 +274,15 @@ export const layoutHandlers: HandlerGroup = {
   'z-index': (value: string): string =>
     Z_INDEX_VALUES[value] ?? (isNumber(value) || isVar(value) ? `z-[${toArbitrary(value)}]` : ''),
 
-  'page-break-after': {
-    auto: '[page-break-after:auto]',
-    always: '[page-break-after:always]',
-    avoid: '[page-break-after:avoid]',
-    left: '[page-break-after:left]',
-    right: '[page-break-after:right]',
-    inherit: '[page-break-after:inherit]',
-    initial: '[page-break-after:initial]'
-  },
+  'page-break-after': identityTable('page-break-after', [
+    'auto', 'always', 'avoid', 'left', 'right', 'inherit', 'initial'
+  ]),
 
-  'page-break-before': {
-    auto: '[page-break-before:auto]',
-    always: '[page-break-before:always]',
-    avoid: '[page-break-before:avoid]',
-    left: '[page-break-before:left]',
-    right: '[page-break-before:right]',
-    inherit: '[page-break-before:inherit]',
-    initial: '[page-break-before:initial]'
-  },
+  'page-break-before': identityTable('page-break-before', [
+    'auto', 'always', 'avoid', 'left', 'right', 'inherit', 'initial'
+  ]),
 
-  'page-break-inside': {
-    auto: '[page-break-inside:auto]',
-    avoid: '[page-break-inside:avoid]',
-    inherit: '[page-break-inside:inherit]',
-    initial: '[page-break-inside:initial]'
-  }
+  'page-break-inside': identityTable('page-break-inside', [
+    'auto', 'avoid', 'inherit', 'initial'
+  ]),
 }

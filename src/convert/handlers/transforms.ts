@@ -22,6 +22,7 @@ import {
   splitTopLevelWhitespace,
   toArbitrary
 } from '../../utils/value.js'
+import { identityTable } from './shared.js'
 
 /* -------------------------------------------------------------------------- */
 /* Shared value normalisation                                                  */
@@ -254,11 +255,9 @@ const transformOrigin: HandlerFn = value => {
  * synthesises `[property:initial]` when the handler declines the value, and
  * keeping it here matches the original byte for byte.
  */
-const TRANSFORM_STYLE_VALUES: ValueTable = Object.freeze({
-  flat: '[transform-style:flat]',
-  'preserve-3d': '[transform-style:preserve-3d]',
-  initial: '[transform-style:initial]'
-})
+const TRANSFORM_STYLE_VALUES = identityTable('transform-style', [
+  'flat', 'preserve-3d', 'initial'
+])
 
 const BACKFACE_VISIBILITY_VALUES: ValueTable = Object.freeze({
   visible: '[backface-visibility:visible]',

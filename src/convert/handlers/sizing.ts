@@ -13,6 +13,7 @@ import type { HandlerFn, HandlerGroup, ValueTable } from '../registry.js'
 import { SIZE_FRACTIONS } from '../../theme/scales.js'
 import { isUnit } from '../../utils/unit.js'
 import { toArbitrary } from '../../utils/value.js'
+import { arbitraryLengthProperty as logicalSize } from './shared.js'
 
 /**
  * A percentage written out to six or more non-zero decimals, e.g. `33.333333%`.
@@ -99,14 +100,6 @@ const constraintSize = (prefix: string, named: ValueTable): HandlerFn => value =
   if (!isUnit(value)) return ''
   return named[value] ?? `${prefix}-[${toArbitrary(value)}]`
 }
-
-/**
- * `logical-width` / `logical-height` have no Tailwind utility, so they are
- * emitted as arbitrary property declarations. They are not real CSS properties
- * either, but the original accepted them and callers may rely on that.
- */
-const logicalSize = (property: string): HandlerFn => value =>
-  isUnit(value) ? `[${property}:${toArbitrary(value)}]` : ''
 
 export const sizingHandlers: HandlerGroup = {
   width: axisSize('w', WIDTH_FRACTIONS),

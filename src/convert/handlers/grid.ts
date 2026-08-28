@@ -18,6 +18,7 @@
 import type { HandlerFn, HandlerGroup, ValueTable } from '../registry.js'
 import { isUnit } from '../../utils/unit.js'
 import { toArbitrary } from '../../utils/value.js'
+import { arbitraryProperty } from './shared.js'
 
 /**
  * Collapse internal whitespace so a lookup key matches however the author spaced
@@ -123,11 +124,6 @@ const templateHandler =
   }
 
 /** No utility exists: reproduce the declaration as an arbitrary property. */
-const arbitraryProperty =
-  (property: string): HandlerFn =>
-  value =>
-    `[${property}:${toArbitrary(value)}]`
-
 /**
  * Gutter length. Unitless `0` is spelled `gap-0` rather than `gap-[0]`; anything
  * that is not a dimension is rejected, which is where the now-real `isUnit`

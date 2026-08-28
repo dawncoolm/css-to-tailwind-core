@@ -22,6 +22,12 @@ import {
   splitTopLevelWhitespace,
   toArbitrary
 } from '../../utils/value.js'
+import {
+  arbitrary as arbitraryProperty,
+  arbitraryColorProperty,
+  arbitraryProperty as asArbitraryProperty,
+  colorKeywords
+} from './shared.js'
 
 /** `border-style` keywords that have a dedicated Tailwind utility. */
 const BORDER_STYLE: ValueTable = Object.freeze({
@@ -33,11 +39,7 @@ const BORDER_STYLE: ValueTable = Object.freeze({
 })
 
 /** Colour keywords with a named `border-*` utility rather than an arbitrary value. */
-const BORDER_COLOR_KEYWORDS: ValueTable = Object.freeze({
-  transparent: 'border-transparent',
-  currentColor: 'border-current',
-  currentcolor: 'border-current'
-})
+const BORDER_COLOR_KEYWORDS = colorKeywords('border')
 
 /**
  * `outline-style` keywords, minus `none` which is version dependent.
@@ -57,17 +59,8 @@ const OUTLINE_STYLE: ValueTable = Object.freeze({
   outset: '[outline-style:outset]'
 })
 
-/** `[<property>:<value>]` — the arbitrary property escape hatch. */
-const arbitraryProperty = (property: string, value: string): string =>
-  `[${property}:${toArbitrary(value)}]`
-
-/** A property with no utility of its own: always an arbitrary property. */
-const asArbitraryProperty = (property: string): HandlerFn => value =>
-  arbitraryProperty(property, value)
-
 /** `border-<side>-color`: no per-side colour utility exists, so emit the property. */
-const sideColor = (property: string): HandlerFn => value =>
-  isColor(value, true) ? arbitraryProperty(property, value) : ''
+const sideColor = arbitraryColorProperty
 
 /**
  * `border-<side>-style`: accepted only for the keywords Tailwind knows on the

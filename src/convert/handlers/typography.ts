@@ -10,11 +10,18 @@
  * below only spell those keywords out where the original package did.
  */
 
-import type { HandlerFn, HandlerGroup, ValueTable } from '../registry.js'
-import { isColor } from '../../utils/color.js'
+import type { HandlerGroup, ValueTable } from '../registry.js'
 import { isNumber, isUnit } from '../../utils/unit.js'
 import { toArbitrary } from '../../utils/value.js'
 import { FONT_SIZE_SCALE } from '../../theme/scales.js'
+import {
+  arbitraryColorProperty,
+  arbitraryLengthProperty,
+  arbitraryProperty,
+  colorHandler,
+  colorKeywords,
+  identityTable
+} from './shared.js'
 
 /* ------------------------------------------------------------------ *
  * Shared handler factories
@@ -24,11 +31,6 @@ import { FONT_SIZE_SCALE } from '../../theme/scales.js'
  * Emit Tailwind's arbitrary *property* escape hatch, `[prop:value]`, for a CSS
  * property that has no utility at all.
  */
-const arbitraryProperty =
-  (property: string): HandlerFn =>
-  value =>
-    `[${property}:${toArbitrary(value)}]`
-
 /**
  * Same as {@link arbitraryProperty} but guarded by {@link isUnit}, for the
  * properties whose value must be a length or a number.
@@ -36,11 +38,6 @@ const arbitraryProperty =
  * The original package guarded these too, but its `isUnit` returned `true` for
  * every non-empty string; the guard only starts rejecting garbage here.
  */
-const arbitraryLengthProperty =
-  (property: string): HandlerFn =>
-  value =>
-    isUnit(value) ? `[${property}:${toArbitrary(value)}]` : ''
-
 /* ------------------------------------------------------------------ *
  * Hoisted lookup tables
  *
@@ -49,13 +46,7 @@ const arbitraryLengthProperty =
  * ------------------------------------------------------------------ */
 
 /** Colour keywords with a dedicated `text-*` utility. */
-const TEXT_COLOR_KEYWORDS: ValueTable = Object.freeze({
-  transparent: 'text-transparent',
-  // The declaration parser lower-cases property names but not values, so both
-  // spellings of `currentColor` reach the handler verbatim.
-  currentColor: 'text-current',
-  currentcolor: 'text-current'
-})
+const TEXT_COLOR_KEYWORDS = colorKeywords('text')
 
 /** `letter-spacing` ladder. Applies regardless of `useAllDefaultValues`, as in the original. */
 const LETTER_SPACING_SCALE: ValueTable = Object.freeze({
@@ -134,9 +125,7 @@ export const typographyHandlers: HandlerGroup = {
    * way; `isColor` now also covers `#RGBA`, `rgb(0 0 0 / 50%)`, `oklch()` and
    * `color-mix()`, which the original's single regexp rejected (issue #16).
    */
-  color: value =>
-    TEXT_COLOR_KEYWORDS[value] ??
-    (isColor(value, true) ? `text-[${toArbitrary(value)}]` : ''),
+  color: colorHandler('text', TEXT_COLOR_KEYWORDS),
 
   /** The `font` shorthand has no Tailwind equivalent; pass it through whole. */
   font: arbitraryProperty('font'),
@@ -173,33 +162,17 @@ export const typographyHandlers: HandlerGroup = {
     auto: 'subpixel-antialiased'
   },
 
-  'font-stretch': {
-    wider: '[font-stretch:wider]',
-    narrower: '[font-stretch:narrower]',
-    'ultra-condensed': '[font-stretch:ultra-condensed]',
-    'extra-condensed': '[font-stretch:extra-condensed]',
-    condensed: '[font-stretch:condensed]',
-    'semi-condensed': '[font-stretch:semi-condensed]',
-    normal: '[font-stretch:normal]',
-    'semi-expanded': '[font-stretch:semi-expanded]',
-    expanded: '[font-stretch:expanded]',
-    'extra-expanded': '[font-stretch:extra-expanded]',
-    'ultra-expanded': '[font-stretch:ultra-expanded]',
-    inherit: '[font-stretch:inherit]',
-    initial: '[font-stretch:initial]'
-  },
+  'font-stretch': identityTable('font-stretch', [
+    'wider', 'narrower', 'ultra-condensed', 'extra-condensed', 'condensed', 'semi-condensed',
+    'normal', 'semi-expanded', 'expanded', 'extra-expanded', 'ultra-expanded', 'inherit', 'initial'
+  ]),
 
   'font-style': {
     italic: 'italic',
     normal: 'not-italic'
   },
 
-  'font-variant': {
-    normal: '[font-variant:normal]',
-    'small-caps': '[font-variant:small-caps]',
-    inherit: '[font-variant:inherit]',
-    initial: '[font-variant:initial]'
-  },
+  'font-variant': identityTable('font-variant', ['normal', 'small-caps', 'inherit', 'initial']),
 
   /** Only the single-keyword forms have utilities; combinations fall through. */
   'font-variant-numeric': {
@@ -253,17 +226,9 @@ export const typographyHandlers: HandlerGroup = {
     justify: 'text-justify'
   },
 
-  'text-align-last': {
-    auto: '[text-align-last:auto]',
-    left: '[text-align-last:left]',
-    right: '[text-align-last:right]',
-    center: '[text-align-last:center]',
-    justify: '[text-align-last:justify]',
-    start: '[text-align-last:start]',
-    end: '[text-align-last:end]',
-    initial: '[text-align-last:initial]',
-    inherit: '[text-align-last:inherit]'
-  },
+  'text-align-last': identityTable('text-align-last', [
+    'auto', 'left', 'right', 'center', 'justify', 'start', 'end', 'initial', 'inherit'
+  ]),
 
   /** Only the single-keyword shorthands map; `underline dotted red` does not. */
   'text-decoration': {
@@ -272,32 +237,19 @@ export const typographyHandlers: HandlerGroup = {
     none: 'no-underline'
   },
 
-  'text-decoration-color': value =>
-    isColor(value, true) ? `[text-decoration-color:${toArbitrary(value)}]` : '',
+  'text-decoration-color': arbitraryColorProperty('text-decoration-color'),
 
-  'text-decoration-line': {
-    none: '[text-decoration-line:none]',
-    underline: '[text-decoration-line:underline]',
-    overline: '[text-decoration-line:overline]',
-    'line-through': '[text-decoration-line:line-through]',
-    initial: '[text-decoration-line:initial]',
-    inherit: '[text-decoration-line:inherit]'
-  },
+  'text-decoration-line': identityTable('text-decoration-line', [
+    'none', 'underline', 'overline', 'line-through', 'initial', 'inherit'
+  ]),
 
   'text-decoration-skip-ink': arbitraryProperty('text-decoration-skip-ink'),
 
-  'text-decoration-style': {
-    solid: '[text-decoration-style:solid]',
-    double: '[text-decoration-style:double]',
-    dotted: '[text-decoration-style:dotted]',
-    dashed: '[text-decoration-style:dashed]',
-    wavy: '[text-decoration-style:wavy]',
-    initial: '[text-decoration-style:initial]',
-    inherit: '[text-decoration-style:inherit]'
-  },
+  'text-decoration-style': identityTable('text-decoration-style', [
+    'solid', 'double', 'dotted', 'dashed', 'wavy', 'initial', 'inherit'
+  ]),
 
-  'text-emphasis-color': value =>
-    isColor(value, true) ? `[text-emphasis-color:${toArbitrary(value)}]` : '',
+  'text-emphasis-color': arbitraryColorProperty('text-emphasis-color'),
 
   'text-emphasis-position': arbitraryProperty('text-emphasis-position'),
 
@@ -305,16 +257,10 @@ export const typographyHandlers: HandlerGroup = {
 
   'text-indent': arbitraryLengthProperty('text-indent'),
 
-  'text-justify': {
-    auto: '[text-justify:auto]',
-    none: '[text-justify:none]',
-    'inter-word': '[text-justify:inter-word]',
-    'inter-ideograph': '[text-justify:inter-ideograph]',
-    'inter-cluster': '[text-justify:inter-cluster]',
-    distribute: '[text-justify:distribute]',
-    kashida: '[text-justify:kashida]',
-    initial: '[text-justify:initial]'
-  },
+  'text-justify': identityTable('text-justify', [
+    'auto', 'none', 'inter-word', 'inter-ideograph', 'inter-cluster', 'distribute', 'kashida',
+    'initial'
+  ]),
 
   'text-orientation': arbitraryProperty('text-orientation'),
 
@@ -338,13 +284,9 @@ export const typographyHandlers: HandlerGroup = {
   'text-underline-position': arbitraryProperty('text-underline-position'),
 
   /** The CSS Text 4 draft keywords the original recognised, not the shipped ones. */
-  'text-wrap': {
-    normal: '[text-wrap:normal]',
-    none: '[text-wrap:none]',
-    unrestricted: '[text-wrap:unrestricted]',
-    suppress: '[text-wrap:suppress]',
-    initial: '[text-wrap:initial]'
-  },
+  'text-wrap': identityTable('text-wrap', [
+    'normal', 'none', 'unrestricted', 'suppress', 'initial'
+  ]),
 
   'vertical-align': {
     baseline: 'align-baseline',
@@ -373,50 +315,27 @@ export const typographyHandlers: HandlerGroup = {
 
   'word-spacing': arbitraryLengthProperty('word-spacing'),
 
-  'word-wrap': {
-    normal: '[word-wrap:normal]',
-    'break-word': '[word-wrap:break-word]',
-    initial: '[word-wrap:initial]'
-  },
+  'word-wrap': identityTable('word-wrap', ['normal', 'break-word', 'initial']),
 
   'overflow-wrap': value =>
     OVERFLOW_WRAPS[value] ?? `[overflow-wrap:${toArbitrary(value)}]`,
 
   'writing-mode': arbitraryProperty('writing-mode'),
 
-  'hanging-punctuation': {
-    none: '[hanging-punctuation:none]',
-    first: '[hanging-punctuation:first]',
-    last: '[hanging-punctuation:last]',
-    'allow-end': '[hanging-punctuation:allow-end]',
-    'force-end': '[hanging-punctuation:force-end]',
-    initial: '[hanging-punctuation:initial]'
-  },
+  'hanging-punctuation': identityTable('hanging-punctuation', [
+    'none', 'first', 'last', 'allow-end', 'force-end', 'initial'
+  ]),
 
   /** Dropped from CSS Text 3; kept because the original mapped it. */
-  'punctuation-trim': {
-    none: '[punctuation-trim:none]',
-    start: '[punctuation-trim:start]',
-    end: '[punctuation-trim:end]',
-    'allow-end': '[punctuation-trim:allow-end]',
-    adjacent: '[punctuation-trim:adjacent]',
-    initial: '[punctuation-trim:initial]'
-  },
+  'punctuation-trim': identityTable('punctuation-trim', [
+    'none', 'start', 'end', 'allow-end', 'adjacent', 'initial'
+  ]),
 
-  'direction': {
-    ltr: '[direction:ltr]',
-    rtl: '[direction:rtl]',
-    inherit: '[direction:inherit]',
-    initial: '[direction:initial]'
-  },
+  'direction': identityTable('direction', ['ltr', 'rtl', 'inherit', 'initial']),
 
-  'unicode-bidi': {
-    normal: '[unicode-bidi:normal]',
-    embed: '[unicode-bidi:embed]',
-    'bidi-override': '[unicode-bidi:bidi-override]',
-    initial: '[unicode-bidi:initial]',
-    inherit: '[unicode-bidi:inherit]'
-  },
+  'unicode-bidi': identityTable('unicode-bidi', [
+    'normal', 'embed', 'bidi-override', 'initial', 'inherit'
+  ]),
 
   'quotes': arbitraryProperty('quotes'),
 

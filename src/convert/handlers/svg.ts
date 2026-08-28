@@ -7,48 +7,29 @@
  * from the value, and the original package relied on the same thing.
  */
 
-import type { HandlerFn, HandlerGroup, ValueTable } from '../registry.js'
+import type { HandlerGroup } from '../registry.js'
 
-import { isColor } from '../../utils/color.js'
 import { isUnit } from '../../utils/unit.js'
 import { toArbitrary } from '../../utils/value.js'
+import { colorHandler, colorKeywords } from './shared.js'
 
 /**
  * `currentColor` is the only paint keyword with a dedicated utility. Both
  * spellings are listed because declaration values reach handlers with their
  * original casing.
  *
- * `none` is deliberately absent even though `fill-none` and `stroke-none` exist:
- * the original never mapped it, and `isColor` does not accept `none` either, so
- * `fill: none` degrades to a diagnostic rather than silently changing meaning.
+ * `transparent` and `none` are deliberately absent even though `fill-none` and
+ * `stroke-none` exist: the original mapped neither, and `isColor` does not accept
+ * `none` either, so `fill: none` degrades to a diagnostic rather than silently
+ * changing meaning.
  */
-const FILL_KEYWORDS: ValueTable = Object.freeze({
-  currentColor: 'fill-current',
-  currentcolor: 'fill-current'
-})
-
-const STROKE_KEYWORDS: ValueTable = Object.freeze({
-  currentColor: 'stroke-current',
-  currentcolor: 'stroke-current'
-})
-
-/**
- * Build a paint handler: keyword lookup first, then anything `isColor` accepts,
- * as an arbitrary value.
- *
- * Gradients are allowed because the original passed `joinLinearGradient` here.
- * A paint server reference (`url(#grad)`) is not a colour and so still yields a
- * diagnostic, which is also the original's behaviour.
- */
-const paintHandler =
-  (keywords: ValueTable, prefix: string): HandlerFn =>
-  (value: string): string =>
-    keywords[value] ?? (isColor(value, true) ? `${prefix}-[${toArbitrary(value)}]` : '')
+const FILL_KEYWORDS = colorKeywords('fill', false)
+const STROKE_KEYWORDS = colorKeywords('stroke', false)
 
 export const svgHandlers: HandlerGroup = {
-  fill: paintHandler(FILL_KEYWORDS, 'fill'),
+  fill: colorHandler('fill', FILL_KEYWORDS),
 
-  stroke: paintHandler(STROKE_KEYWORDS, 'stroke'),
+  stroke: colorHandler('stroke', STROKE_KEYWORDS),
 
   /**
    * Stroke widths reuse the `stroke-` prefix. The original interpolated the raw

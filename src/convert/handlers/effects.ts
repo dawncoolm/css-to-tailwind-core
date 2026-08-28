@@ -13,17 +13,16 @@
  * `ctx.theme.boxShadow` rather than branching on `ctx.version` itself.
  */
 
-import type { HandlerFn, HandlerGroup, ValueTable } from '../registry.js'
+import type { HandlerGroup, ValueTable } from '../registry.js'
 import { isUnit } from '../../utils/unit.js'
 import { toArbitrary } from '../../utils/value.js'
+import {
+  arbitrary as arbitraryProperty,
+  arbitraryProperty as asArbitraryProperty,
+  BLEND_MODES,
+  prefixedTable
+} from './shared.js'
 
-/** `[<property>:<value>]` — the arbitrary property escape hatch. */
-const arbitraryProperty = (property: string, value: string): string =>
-  `[${property}:${toArbitrary(value)}]`
-
-/** A property with no utility of its own: always an arbitrary property. */
-const asArbitraryProperty = (property: string): HandlerFn => value =>
-  arbitraryProperty(property, value)
 
 /**
  * Canonical spelling of a shadow list, used only as a lookup key.
@@ -66,24 +65,7 @@ const OPACITY_VALUES: ValueTable = Object.freeze({
   '1': 'opacity-100'
 })
 
-const MIX_BLEND_MODE: ValueTable = Object.freeze({
-  normal: 'mix-blend-normal',
-  multiply: 'mix-blend-multiply',
-  screen: 'mix-blend-screen',
-  overlay: 'mix-blend-overlay',
-  darken: 'mix-blend-darken',
-  lighten: 'mix-blend-lighten',
-  'color-dodge': 'mix-blend-color-dodge',
-  'color-burn': 'mix-blend-color-burn',
-  'hard-light': 'mix-blend-hard-light',
-  'soft-light': 'mix-blend-soft-light',
-  difference: 'mix-blend-difference',
-  exclusion: 'mix-blend-exclusion',
-  hue: 'mix-blend-hue',
-  saturation: 'mix-blend-saturation',
-  color: 'mix-blend-color',
-  luminosity: 'mix-blend-luminosity'
-})
+const MIX_BLEND_MODE = prefixedTable('mix-blend', BLEND_MODES)
 
 export const effectHandlers: HandlerGroup = {
   /**

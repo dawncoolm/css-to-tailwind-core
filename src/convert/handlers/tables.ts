@@ -10,6 +10,7 @@ import type { HandlerFn, HandlerGroup, ValueTable } from '../registry.js'
 
 import { isUnit } from '../../utils/unit.js'
 import { splitTopLevelWhitespace, toArbitrary } from '../../utils/value.js'
+import { identityTable } from './shared.js'
 
 const BORDER_COLLAPSE: ValueTable = Object.freeze({
   collapse: 'border-collapse',
@@ -21,19 +22,9 @@ const BORDER_COLLAPSE: ValueTable = Object.freeze({
  * and the other CSS-wide keywords are not included, so they fall through to a
  * diagnostic as before.
  */
-const CAPTION_SIDE: ValueTable = Object.freeze({
-  top: '[caption-side:top]',
-  bottom: '[caption-side:bottom]',
-  inherit: '[caption-side:inherit]',
-  initial: '[caption-side:initial]'
-})
+const CAPTION_SIDE = identityTable('caption-side', ['top', 'bottom', 'inherit', 'initial'])
 
-const EMPTY_CELLS: ValueTable = Object.freeze({
-  hide: '[empty-cells:hide]',
-  show: '[empty-cells:show]',
-  inherit: '[empty-cells:inherit]',
-  initial: '[empty-cells:initial]'
-})
+const EMPTY_CELLS = identityTable('empty-cells', ['hide', 'show', 'inherit', 'initial'])
 
 const TABLE_LAYOUT: ValueTable = Object.freeze({
   auto: 'table-auto',

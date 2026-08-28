@@ -6,31 +6,16 @@
  * only thing they share.
  */
 
-import type { HandlerFn, HandlerGroup, ValueTable } from '../registry.js'
+import type { HandlerGroup } from '../registry.js'
 
-import { toArbitrary } from '../../utils/value.js'
-
-/**
- * Emit `[property:value]` unconditionally.
- *
- * The closure is built once per property at module scope; the original allocated
- * a fresh closure and template string on every call.
- */
-const arbitraryProperty =
-  (property: string): HandlerFn =>
-  (value: string): string =>
-    `[${property}:${toArbitrary(value)}]`
+import { arbitraryProperty, identityTable } from './shared.js'
 
 /**
  * `all` accepts only the CSS-wide keywords. The original's table listed three of
  * them; `revert` and `revert-layer` stay absent, so they fall through to a
  * diagnostic as before rather than silently gaining support.
  */
-const ALL: ValueTable = Object.freeze({
-  initial: '[all:initial]',
-  inherit: '[all:inherit]',
-  unset: '[all:unset]'
-})
+const ALL = identityTable('all', ['initial', 'inherit', 'unset'])
 
 export const miscHandlers: HandlerGroup = {
   all: ALL,

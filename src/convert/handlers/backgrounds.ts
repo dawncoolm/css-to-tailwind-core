@@ -13,17 +13,14 @@
 import type { HandlerGroup, ValueTable } from '../registry.js'
 import { isColor } from '../../utils/color.js'
 import { toArbitrary } from '../../utils/value.js'
+import { BLEND_MODES, colorKeywords, prefixedTable } from './shared.js'
 
 /**
  * `transparent` and `currentColor` get dedicated utilities; every other colour
  * becomes an arbitrary value. Both spellings of `currentColor` are listed
  * because declaration values reach handlers with their original casing.
  */
-const COLOR_KEYWORDS: ValueTable = Object.freeze({
-  transparent: 'bg-transparent',
-  currentColor: 'bg-current',
-  currentcolor: 'bg-current'
-})
+const COLOR_KEYWORDS = colorKeywords('bg')
 
 const BACKGROUND_ATTACHMENT: ValueTable = Object.freeze({
   fixed: 'bg-fixed',
@@ -31,24 +28,7 @@ const BACKGROUND_ATTACHMENT: ValueTable = Object.freeze({
   scroll: 'bg-scroll'
 })
 
-const BACKGROUND_BLEND_MODE: ValueTable = Object.freeze({
-  normal: 'bg-blend-normal',
-  multiply: 'bg-blend-multiply',
-  screen: 'bg-blend-screen',
-  overlay: 'bg-blend-overlay',
-  darken: 'bg-blend-darken',
-  lighten: 'bg-blend-lighten',
-  'color-dodge': 'bg-blend-color-dodge',
-  'color-burn': 'bg-blend-color-burn',
-  'hard-light': 'bg-blend-hard-light',
-  'soft-light': 'bg-blend-soft-light',
-  difference: 'bg-blend-difference',
-  exclusion: 'bg-blend-exclusion',
-  hue: 'bg-blend-hue',
-  saturation: 'bg-blend-saturation',
-  color: 'bg-blend-color',
-  luminosity: 'bg-blend-luminosity'
-})
+const BACKGROUND_BLEND_MODE = prefixedTable('bg-blend', BLEND_MODES)
 
 const BACKGROUND_CLIP: ValueTable = Object.freeze({
   'border-box': 'bg-clip-border',

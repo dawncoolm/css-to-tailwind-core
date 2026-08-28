@@ -19,8 +19,12 @@
  */
 
 import type { HandlerFn, HandlerGroup, ValueTable } from '../registry.js'
-import { isUnit } from '../../utils/unit.js'
 import { toArbitrary } from '../../utils/value.js'
+import {
+  arbitraryLengthProperty as arbitraryUnitProperty,
+  arbitraryProperty,
+  identityTable
+} from './shared.js'
 
 /**
  * Build a handler that always falls back to the arbitrary-property syntax.
@@ -28,11 +32,6 @@ import { toArbitrary } from '../../utils/value.js'
  * The factory runs once per property at module load, never per conversion, so
  * no allocation happens inside the returned handler.
  */
-const arbitraryProperty =
-  (property: string): HandlerFn =>
-  value =>
-    `[${property}:${toArbitrary(value)}]`
-
 /**
  * As {@link arbitraryProperty}, but rejects values that are not dimensions.
  *
@@ -41,11 +40,6 @@ const arbitraryProperty =
  * predicate now and the guard is kept deliberately: it is what stops
  * `scrollbar-width: potato` from becoming `[scrollbar-width:potato]`.
  */
-const arbitraryUnitProperty =
-  (property: string): HandlerFn =>
-  value =>
-    isUnit(value) ? `[${property}:${toArbitrary(value)}]` : ''
-
 /**
  * Only `appearance: none` has a utility; `auto` and anything else fall through
  * to `[appearance:…]`. This matches the original, which never emitted
@@ -95,21 +89,12 @@ const USER_SELECT: ValueTable = Object.freeze({
 })
 
 /** `target-new` from CSS3 Hyperlink Presentation: no Tailwind utility exists. */
-const TARGET_NEW: ValueTable = Object.freeze({
-  window: '[target-new:window]',
-  tab: '[target-new:tab]',
-  none: '[target-new:none]',
-  initial: '[target-new:initial]'
-})
+const TARGET_NEW = identityTable('target-new', ['window', 'tab', 'none', 'initial'])
 
 /** `target-position`, likewise arbitrary-only. */
-const TARGET_POSITION: ValueTable = Object.freeze({
-  above: '[target-position:above]',
-  behind: '[target-position:behind]',
-  front: '[target-position:front]',
-  back: '[target-position:back]',
-  initial: '[target-position:initial]'
-})
+const TARGET_POSITION = identityTable('target-position', [
+  'above', 'behind', 'front', 'back', 'initial'
+])
 
 export const interactivityHandlers: HandlerGroup = Object.freeze({
   appearance,

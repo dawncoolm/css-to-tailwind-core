@@ -19,6 +19,7 @@
 import type { HandlerFn, HandlerGroup, ValueTable } from '../registry.js'
 import { isNumber, isTime } from '../../utils/unit.js'
 import { toArbitrary } from '../../utils/value.js'
+import { arbitraryProperty } from './shared.js'
 
 /* -------------------------------------------------------------------------- */
 /* Durations                                                                  */
@@ -146,11 +147,6 @@ const transitionTimingFunction: HandlerFn = value => {
  * The original applied no validation to these at all; the only added guard is on
  * an empty value, which could only ever produce the malformed `[animation-name:]`.
  */
-const arbitraryProperty = (property: string): HandlerFn => value => {
-  const trimmed = value.trim()
-  return trimmed === '' ? '' : `[${property}:${toArbitrary(trimmed)}]`
-}
-
 /* -------------------------------------------------------------------------- */
 /* Shorthands                                                                 */
 /* -------------------------------------------------------------------------- */
