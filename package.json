@@ -1,0 +1,54 @@
+{
+  "name": "css-to-tailwind-core",
+  "version": "1.0.0",
+  "description": "Convert CSS into Tailwind CSS utility classes. Zero runtime dependencies, Tailwind v3 and v4 presets, full diagnostics.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "css",
+    "tailwind",
+    "tailwindcss",
+    "css-to-tailwind",
+    "converter",
+    "translator"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "bench": "vitest bench --run",
+    "parity": "tsx scripts/parity-diff.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "css-to-tailwind-translator": "1.2.8",
+    "tsup": "^8.3.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}
