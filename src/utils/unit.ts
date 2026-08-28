@@ -8,6 +8,8 @@
  * implementation of the same predicate.
  */
 
+import { parseFunctionCall } from './value.js'
+
 const LENGTH_UNITS = new Set([
   // Font relative
   'em', 'rem', 'ex', 'rex', 'ch', 'rch', 'ic', 'ric', 'cap', 'rcap', 'lh', 'rlh',
@@ -60,7 +62,6 @@ const VALUE_FUNCTIONS = new Set([
 
 const NUMBER_RE = /^[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?$/
 const DIMENSION_RE = /^([+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?)([a-zA-Z%]+)$/
-const FUNCTION_RE = /^([a-zA-Z-]+)\((.*)\)$/s
 
 /** A plain number with no unit, e.g. `1.5`, `-2`, `.5`, `1e3`. */
 export const isNumber = (value: string): boolean => NUMBER_RE.test(value.trim())
@@ -80,21 +81,8 @@ export const isVar = (value: string): boolean => /^var\(\s*--/.test(value.trim()
  * a truncated `calc(100%` is rejected.
  */
 export const isValueFunction = (value: string): boolean => {
-  const match = FUNCTION_RE.exec(value.trim())
-  if (!match) return false
-  if (!VALUE_FUNCTIONS.has((match[1] as string).toLowerCase())) return false
-  return isBalanced(match[2] as string)
-}
-
-const isBalanced = (inner: string): boolean => {
-  let depth = 0
-  for (const char of inner) {
-    if (char === '(') depth++
-    else if (char === ')') {
-      if (depth-- === 0) return false
-    }
-  }
-  return depth === 0
+  const call = parseFunctionCall(value.trim())
+  return call !== null && VALUE_FUNCTIONS.has(call[0])
 }
 
 /**

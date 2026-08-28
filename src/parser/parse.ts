@@ -8,7 +8,7 @@
  */
 
 import type { Diagnostic } from '../types.js'
-import { splitTopLevel } from '../utils/value.js'
+import { collapseWhitespace as collapse, splitTopLevel } from '../utils/value.js'
 import { parseDeclaration, type Declaration } from './declarations.js'
 import { tokenize } from './tokenizer.js'
 
@@ -47,8 +47,6 @@ export interface StyleSheet {
   nodes: Node[]
   diagnostics: Diagnostic[]
 }
-
-const collapse = (text: string): string => text.replace(/\s+/g, ' ').trim()
 
 const makeRule = (prelude: string, start: number): Rule => ({
   kind: 'rule',

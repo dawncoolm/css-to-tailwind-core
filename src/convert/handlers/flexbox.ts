@@ -18,7 +18,7 @@
 import type { ConversionContext } from '../context.js'
 import type { HandlerFn, HandlerGroup } from '../registry.js'
 import { isUnit } from '../../utils/unit.js'
-import { toArbitrary } from '../../utils/value.js'
+import { collapseWhitespace, toArbitrary } from '../../utils/value.js'
 import { identityTable } from './shared.js'
 
 /* ------------------------------------------------------------------------- *
@@ -208,7 +208,7 @@ const BOX_PACK = identityTable('box-pack', ['start', 'end', 'center', 'justify',
  * output is identical either way because {@link toArbitrary} collapses runs too.
  */
 const flex: HandlerFn = value => {
-  const normalized = value.replace(/\s+/g, ' ').trim()
+  const normalized = collapseWhitespace(value)
   return FLEX_SHORTHAND[normalized] ?? `flex-[${toArbitrary(value)}]`
 }
 

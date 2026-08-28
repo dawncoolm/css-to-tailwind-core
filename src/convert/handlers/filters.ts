@@ -28,7 +28,13 @@
 import type { ConversionContext } from '../context.js'
 import { resolveSubValue } from '../context.js'
 import type { HandlerFn, HandlerGroup, ValueTable } from '../registry.js'
-import { hasNegative, splitTopLevelWhitespace, toArbitrary } from '../../utils/value.js'
+import {
+  collapseWhitespace as collapse,
+  hasNegative,
+  parseFunctionCall,
+  splitTopLevelWhitespace,
+  toArbitrary
+} from '../../utils/value.js'
 
 /**
  * No filter sub-function has a default ladder of its own — the built-in scale is
@@ -90,11 +96,6 @@ const BACKDROP_FILTER_FUNCTIONS: ReadonlySet<string> = new Set([
 ])
 
 /** `name(argument)`, anchored so a trailing comment or garbage is rejected. */
-const CALL_RE = /^([a-zA-Z][a-zA-Z0-9-]*)\(\s*([\s\S]+?)\s*\)$/
-
-/** Collapse every run of whitespace to a single space and trim. */
-const collapse = (value: string): string => value.replace(/\s+/g, ' ').trim()
-
 /**
  * Look a whole filter call up in the built-in scale.
  *
@@ -199,14 +200,13 @@ const convertFilterList = (
       continue
     }
 
-    const match = CALL_RE.exec(call)
+    const parsed = parseFunctionCall(call)
+    const args = parsed?.[1].trim() ?? ''
     // Divergence from the original: a list entry that is not a function call at
     // all (`inherit`, a stray token) used to yield the bare marker class with a
     // trailing space. It now degrades to the arbitrary property like any other
     // unmappable entry.
-    const utility = match
-      ? utilityForCall(match[1] as string, match[2] as string, ctx, backdrop)
-      : ''
+    const utility = parsed && args !== '' ? utilityForCall(parsed[0], args, ctx, backdrop) : ''
     if (utility === '') return arbitrary
     utilities.push(utility)
   }

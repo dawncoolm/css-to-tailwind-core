@@ -9,7 +9,11 @@
 import type { HandlerFn, HandlerGroup, ValueTable } from '../registry.js'
 
 import { isNumber, isUnit, isVar } from '../../utils/unit.js'
-import { hasNegative, toArbitrary } from '../../utils/value.js'
+import {
+  hasNegative,
+  normalizeFractionPercentage,
+  toArbitrary
+} from '../../utils/value.js'
 import { SIZE_FRACTIONS } from '../../theme/scales.js'
 import {
   arbitraryColorProperty,
@@ -50,20 +54,6 @@ const INSET_KEYWORDS: ValueTable = Object.freeze(
     Object.entries(SIZE_FRACTIONS).filter(([value]) => value !== '100vw' && value !== '100vh')
   )
 )
-
-/** Percentages written to more precision than the fraction table carries. */
-const PRECISE_PERCENTAGE_RE = /^\d+\.[1-9]{2,}%$/
-
-/**
- * Round `33.333333%` down to the `33.33%` spelling the fraction table uses.
- *
- * Mirrors the original's `getUnitMetacharactersVal` preamble, including its
- * quirk of only rounding when every digit after the decimal point is non-zero.
- */
-const normalizeFractionPercentage = (value: string): string => {
-  if (!PRECISE_PERCENTAGE_RE.test(value)) return value
-  return `${Number(value.slice(0, -1)).toFixed(6).replace(/(\.[1-9]{2})\d+/, '$1')}%`
-}
 
 /**
  * Build the handler for one inset property.

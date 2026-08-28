@@ -15,7 +15,7 @@
 
 import type { HandlerGroup, ValueTable } from '../registry.js'
 import { isUnit } from '../../utils/unit.js'
-import { toArbitrary } from '../../utils/value.js'
+import { collapseWhitespace, toArbitrary } from '../../utils/value.js'
 import {
   arbitrary as arbitraryProperty,
   arbitraryProperty as asArbitraryProperty,
@@ -33,7 +33,7 @@ import {
  * `0  1px  2px  0  rgb(0 0 0 / 0.05)` still find `shadow-sm`.
  */
 const normalizeShadow = (value: string): string =>
-  value.replace(/\s+/g, ' ').replace(/\s*,\s*/g, ', ').trim()
+  collapseWhitespace(value).replace(/\s*,\s*/g, ', ')
 
 /**
  * `opacity` values with a named utility.

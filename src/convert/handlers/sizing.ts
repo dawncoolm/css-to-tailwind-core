@@ -12,28 +12,8 @@
 import type { HandlerFn, HandlerGroup, ValueTable } from '../registry.js'
 import { SIZE_FRACTIONS } from '../../theme/scales.js'
 import { isUnit } from '../../utils/unit.js'
-import { toArbitrary } from '../../utils/value.js'
+import { normalizeFractionPercentage, toArbitrary } from '../../utils/value.js'
 import { arbitraryLengthProperty as logicalSize } from './shared.js'
-
-/**
- * A percentage written out to six or more non-zero decimals, e.g. `33.333333%`.
- * Authors and design tools emit these for thirds and twelfths, but the fraction
- * table is keyed on the two-decimal form.
- */
-const REPEATING_PERCENTAGE_RE = /^\d+\.[1-9]{2,}%$/
-
-/** The digits past the second decimal, which the rounding above discards. */
-const EXCESS_DECIMALS_RE = /(\.[1-9]{2})\d+/
-
-/**
- * Round a repeating percentage down to the two decimals the fraction table uses,
- * so `33.333333%` finds `1/3`. Anything else passes through untouched.
- */
-const normalizeFractionPercentage = (value: string): string => {
-  if (!REPEATING_PERCENTAGE_RE.test(value)) return value
-  const rounded = Number(value.slice(0, -1)).toFixed(6).replace(EXCESS_DECIMALS_RE, '$1')
-  return `${rounded}%`
-}
 
 /**
  * {@link SIZE_FRACTIONS} without one viewport key.

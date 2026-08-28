@@ -17,7 +17,7 @@
 
 import type { HandlerFn, HandlerGroup, ValueTable } from '../registry.js'
 import { isUnit } from '../../utils/unit.js'
-import { toArbitrary } from '../../utils/value.js'
+import { collapseWhitespace, toArbitrary } from '../../utils/value.js'
 import { arbitraryProperty } from './shared.js'
 
 /**
@@ -27,7 +27,7 @@ import { arbitraryProperty } from './shared.js'
  * and the arbitrary fallback is unaffected because `toArbitrary` collapses
  * whitespace runs too.
  */
-const normalizeSpace = (value: string): string => value.replace(/\s+/g, ' ').trim()
+const normalizeSpace = collapseWhitespace
 
 /** `grid-auto-columns` / `grid-auto-rows` — the four named track sizes. */
 const buildAutoTrackTable = (utility: string): ValueTable =>

@@ -8,6 +8,8 @@
  * the full CSS Color 4 surface.
  */
 
+import { parseFunctionCall } from './value.js'
+
 /** CSS named colours, plus the wide keywords that may appear in their place. */
 const NAMED_COLORS: ReadonlySet<string> = new Set([
   'initial', 'inherit', 'unset', 'revert', 'currentcolor', 'transparent',
@@ -61,23 +63,6 @@ const GRADIENT_FUNCTIONS = new Set([
   'repeating-conic-gradient'
 ])
 
-const FUNCTION_RE = /^([a-z-]+)\((.*)\)$/is
-
-const parseFunction = (value: string): [name: string, args: string] | null => {
-  const match = FUNCTION_RE.exec(value)
-  if (!match) return null
-
-  // Reject a truncated call such as `rgb(0,0,0` or `rgb(0,0,0))`.
-  let depth = 0
-  const args = match[2] as string
-  for (const char of args) {
-    if (char === '(') depth++
-    else if (char === ')' && depth-- === 0) return null
-  }
-  if (depth !== 0) return null
-
-  return [(match[1] as string).toLowerCase(), args]
-}
 
 /**
  * Whether `value` denotes a colour.
@@ -93,7 +78,7 @@ export const isColor = (value: string, allowGradient = false): boolean => {
   if (NAMED_COLORS.has(trimmed.toLowerCase())) return true
   if (HEX_RE.test(trimmed)) return true
 
-  const fn = parseFunction(trimmed)
+  const fn = parseFunctionCall(trimmed)
   if (!fn) return false
   if (COLOR_FUNCTIONS.has(fn[0])) return true
   return allowGradient && GRADIENT_FUNCTIONS.has(fn[0])
@@ -101,7 +86,7 @@ export const isColor = (value: string, allowGradient = false): boolean => {
 
 /** Whether `value` is one of the CSS gradient functions. */
 export const isGradient = (value: string): boolean => {
-  const fn = parseFunction(value.trim())
+  const fn = parseFunctionCall(value.trim())
   return fn !== null && GRADIENT_FUNCTIONS.has(fn[0])
 }
 

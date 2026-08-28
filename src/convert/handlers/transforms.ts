@@ -19,6 +19,8 @@ import { isUnit } from '../../utils/unit.js'
 import {
   hasNegative,
   splitTopLevel,
+  normalizeFractionPercentage,
+  parseFunctionCall,
   splitTopLevelWhitespace,
   toArbitrary
 } from '../../utils/value.js'
@@ -27,30 +29,6 @@ import { identityTable } from './shared.js'
 /* -------------------------------------------------------------------------- */
 /* Shared value normalisation                                                  */
 /* -------------------------------------------------------------------------- */
-
-/**
- * A percentage written out to six or more non-zero decimals, e.g. `33.333333%`.
- * Design tools emit these for thirds, but the translate table is keyed on the
- * two-decimal form.
- */
-const REPEATING_PERCENTAGE_RE = /^\d+\.[1-9]{2,}%$/
-
-/** The digits past the second decimal, which the rounding below discards. */
-const EXCESS_DECIMALS_RE = /(\.[1-9]{2})\d+/
-
-/**
- * Round a repeating percentage down to the two decimals the translate table
- * uses, so `translateX(33.333333%)` finds `1/3`. Anything else passes through.
- *
- * The original applied this only inside `translate`, `translateX` and
- * `translateY`; that is preserved — `scale`, `rotate` and `skew` do not take
- * percentages in the first place.
- */
-const normalizeFractionPercentage = (value: string): string => {
-  if (!REPEATING_PERCENTAGE_RE.test(value)) return value
-  const rounded = Number(value.slice(0, -1)).toFixed(6).replace(EXCESS_DECIMALS_RE, '$1')
-  return `${rounded}%`
-}
 
 /* -------------------------------------------------------------------------- */
 /* transform                                                                   */
@@ -168,9 +146,6 @@ const TRANSFORM_FUNCTIONS: Readonly<Record<string, TransformFn>> = Object.freeze
   skewy: single((ctx, value) => skewClass(ctx, 'y', value))
 })
 
-/** `name(arguments)`, the only shape a transform list component may take. */
-const FUNCTION_CALL_RE = /^([a-zA-Z][a-zA-Z0-9-]*)\((.*)\)$/s
-
 /** The whole declaration as one arbitrary property, used when anything fails. */
 const arbitraryTransform = (value: string): string => `[transform:${toArbitrary(value)}]`
 
@@ -196,15 +171,15 @@ const transform: HandlerFn = (value, ctx) => {
   const classes: string[] = []
 
   for (const component of splitTopLevelWhitespace(value)) {
-    const match = FUNCTION_CALL_RE.exec(component)
+    const call = parseFunctionCall(component)
     // Not functional notation. The original dropped such a component silently
     // rather than treating the declaration as arbitrary; that is preserved.
-    if (!match) continue
+    if (!call) continue
 
-    const rawArgs = match[2] as string
+    const rawArgs = call[1]
     if (rawArgs.trim() === '') continue
 
-    const fn = TRANSFORM_FUNCTIONS[(match[1] as string).toLowerCase()]
+    const fn = TRANSFORM_FUNCTIONS[call[0]]
     if (!fn) return arbitraryTransform(value)
 
     const args = splitTopLevel(rawArgs, ',')
