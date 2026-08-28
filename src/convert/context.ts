@@ -63,14 +63,15 @@ export const createContext = (config: TranslatorConfig = {}): ConversionContext 
  * `customTheme[group]?.[value] || (useAllDefaultValues && defaults[value]) || '[value]'`.
  *
  * @param group `customTheme` key, e.g. `rotate` or `backdrop-blur`.
- * @param defaults Built-in scale for the group, e.g. `theme.rotate`.
+ * @param defaults Built-in scale for the group, e.g. `theme.rotate`. Omitted by
+ *   the filter handlers, which have no per-group scale of their own.
  * @returns A class *suffix*, already wrapped in brackets when it is arbitrary.
  */
 export const resolveSubValue = (
   ctx: ConversionContext,
   group: string,
   value: string,
-  defaults: Readonly<Record<string, string>>
+  defaults: Readonly<Record<string, string>> = {}
 ): string =>
   ctx.customTheme[group]?.[value] ||
   (ctx.useAllDefaultValues ? defaults[value] : undefined) ||

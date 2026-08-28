@@ -2,7 +2,7 @@
 
 import { createContext, type ConversionContext } from './convert/context.js'
 import { convertDeclaration, isKnownProperty } from './convert/declaration.js'
-import { dedupe, formatClasses, splitClasses } from './convert/format.js'
+import { dedupe, formatClasses, splitClasses, variantPrefixOf } from './convert/format.js'
 import type { Declaration } from './parser/declarations.js'
 import { parse, type AtRule, type Node, type Rule } from './parser/parse.js'
 import { resolveAtRule, UNSUPPORTED_AT_RULES } from './selector/media.js'
@@ -26,6 +26,8 @@ interface WalkState {
   readonly path: readonly string[]
 }
 
+const ROOT_STATE: WalkState = { variants: [], path: [] }
+
 /**
  * Convert CSS source into Tailwind utility classes.
  *
@@ -42,22 +44,18 @@ export const CssToTailwindTranslator = (
   ctx.diagnostics.push(...sheet.diagnostics)
 
   const data: ResultCode[] = []
-  let sawUnsupportedAtRule = false
 
   const walk = (nodes: readonly Node[], state: WalkState): void => {
     for (const node of nodes) {
-      if (node.kind === 'atrule') {
-        if (walkAtRule(node, state) === 'unsupported') sawUnsupportedAtRule = true
-        continue
-      }
-      walkRule(node, state)
+      if (node.kind === 'atrule') walkAtRule(node, state)
+      else walkRule(node, state)
     }
   }
 
-  const walkAtRule = (node: AtRule, state: WalkState): 'ok' | 'unsupported' => {
+  const walkAtRule = (node: AtRule, state: WalkState): void => {
     const resolved = resolveAtRule(node, ctx)
 
-    if (resolved.unsupported) {
+    if (resolved.kind === 'unsupported') {
       ctx.diagnostics.push({
         level: 'warning',
         code: 'unsupported-at-rule',
@@ -66,62 +64,66 @@ export const CssToTailwindTranslator = (
         start: node.start,
         end: node.end
       })
-      return 'unsupported'
+      return
     }
 
-    const nested: WalkState = resolved.transparent
-      ? state
-      : {
-          variants: resolved.variant
-            ? [...state.variants, resolved.variant]
-            : state.variants,
-          path: [...state.path, node.prelude]
-        }
+    const nested: WalkState =
+      resolved.kind === 'transparent'
+        ? state
+        : {
+            variants: [...state.variants, resolved.variant],
+            path: [...state.path, node.prelude]
+          }
 
     // Declarations sitting directly inside an at-rule have no selector of their
     // own; report them under the at-rule prelude.
     if (node.declarations.length > 0) {
-      emit(node.prelude, node.declarations, nested, node.prelude)
+      emit(node.prelude, node.declarations, nested)
     }
 
     walk(node.children, nested)
-    return 'ok'
   }
 
   const walkRule = (node: Rule, state: WalkState): void => {
-    const variants = [...state.variants, ...selectorVariants(node, ctx)]
-    const nested: WalkState = { variants, path: [...state.path, node.selector] }
-
-    emit(node.selector, node.declarations, { variants, path: state.path }, node.selector)
+    const own = selectorVariants(node, ctx)
+    emit(node.selector, node.declarations, {
+      variants: own.length > 0 ? [...state.variants, ...own] : state.variants,
+      path: state.path
+    })
 
     // CSS nesting: children inherit this rule's variants but report their own
     // selector, which is what a preprocessor would have emitted.
-    walk(node.children, nested)
+    if (node.children.length > 0) {
+      walk(node.children, {
+        variants: [...state.variants, ...own],
+        path: [...state.path, node.selector]
+      })
+    }
   }
 
   const emit = (
     selector: string,
     declarations: readonly Declaration[],
-    state: WalkState,
-    diagnosticSelector: string
+    state: WalkState
   ): void => {
     if (declarations.length === 0) return
 
+    // Constant for every declaration in this rule, so it is built once.
+    const variantPrefix = variantPrefixOf(state.variants)
     const classes: string[] = []
+
     for (const declaration of declarations) {
       const converted = convertDeclaration(declaration, ctx)
       if (converted === '') {
-        pushUnconvertible(ctx, declaration, diagnosticSelector)
+        pushUnconvertible(ctx, declaration, selector)
         continue
       }
-      classes.push(
-        ...formatClasses(splitClasses(converted), {
-          variants: state.variants,
-          important: declaration.important,
-          prefix: ctx.prefix,
-          version: ctx.version
-        })
-      )
+      formatClasses(splitClasses(converted), classes, {
+        variantPrefix,
+        important: declaration.important,
+        prefix: ctx.prefix,
+        version: ctx.version
+      })
     }
 
     data.push({
@@ -130,10 +132,12 @@ export const CssToTailwindTranslator = (
     })
   }
 
-  walk(sheet.nodes, { variants: [], path: [] })
+  walk(sheet.nodes, ROOT_STATE)
 
   return {
-    code: sawUnsupportedAtRule ? 'SyntaxError' : 'OK',
+    code: ctx.diagnostics.some(d => d.code === 'unsupported-at-rule')
+      ? 'SyntaxError'
+      : 'OK',
     data,
     diagnostics: ctx.diagnostics
   }

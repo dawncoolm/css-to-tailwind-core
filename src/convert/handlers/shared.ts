@@ -80,6 +80,17 @@ export const colorHandler = (prefix: string, keywords: ValueTable): HandlerFn =>
   keywords[value] ?? (isColor(value, true) ? `${prefix}-[${toArbitrary(value)}]` : '')
 
 /**
+ * A utility that only ever takes an arbitrary value: `text-[13px]`.
+ *
+ * @param guard Predicate the value must pass; a rejected value yields `''`,
+ *   which the caller turns into a diagnostic.
+ */
+export const arbitraryValue =
+  (utility: string, guard: (value: string) => boolean): HandlerFn =>
+  value =>
+    guard(value) ? `${utility}-[${toArbitrary(value)}]` : ''
+
+/**
  * The most common non-trivial handler: look the value up in a table, and fall
  * back to an arbitrary value under `utility`.
  *

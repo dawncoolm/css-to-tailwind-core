@@ -175,7 +175,6 @@ export const V3_PRESET = Object.freeze({
   defaults: DEFAULT_VALUES_V3,
   media: MEDIA_BREAKPOINTS,
   radius: RADIUS_SCALE_V3,
-  boxShadow: BOX_SHADOW_SCALE_V3,
   filter: FILTER_SCALE_V3,
   spacing: SPACING_SCALE,
   scale: SCALE_VALUES,

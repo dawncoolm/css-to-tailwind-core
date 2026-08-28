@@ -14,11 +14,7 @@
  * - the bare `transform` / `filter` / `backdrop-filter` marker classes are gone
  */
 
-import {
-  BOX_SHADOW_SCALE_V4,
-  RADIUS_SCALE_V4,
-  SPACING_SCALE
-} from './scales.js'
+import { BOX_SHADOW_SCALE_V4, RADIUS_SCALE_V4 } from './scales.js'
 import { DEFAULT_VALUES_V3, FILTER_SCALE_V3, V3_PRESET } from './v3.js'
 
 /** v4 shifted every blur name down one step and added `blur-xs`. */
@@ -75,7 +71,5 @@ export const V4_PRESET = Object.freeze({
   ...V3_PRESET,
   defaults: DEFAULT_VALUES_V4,
   radius: RADIUS_SCALE_V4,
-  boxShadow: BOX_SHADOW_SCALE_V4,
-  filter: FILTER_SCALE_V4,
-  spacing: SPACING_SCALE
+  filter: FILTER_SCALE_V4
 })

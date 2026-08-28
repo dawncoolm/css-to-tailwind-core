@@ -37,13 +37,6 @@ import {
   toArbitrary
 } from '../../utils/value.js'
 
-/**
- * No filter sub-function has a default ladder of its own — the built-in scale is
- * keyed on the whole call (`blur(4px)`), not on the bare amount (`4px`). Passing
- * this empty table to `resolveSubValue` reduces it to the original's
- * `customTheme[group]?.[v] ?? '[v]'` lookup.
- */
-const NO_SUB_DEFAULTS: ValueTable = Object.freeze({})
 
 /**
  * `backdrop-filter: opacity(…)` defaults.
@@ -152,10 +145,10 @@ const utilityForCall = (
   if (name === 'hue-rotate') {
     // Tailwind spells a negative rotation by hoisting the sign to the front.
     const [sign, magnitude] = hasNegative(amount)
-    return `${sign}${group}-${resolveSubValue(ctx, group, magnitude, NO_SUB_DEFAULTS)}`
+    return `${sign}${group}-${resolveSubValue(ctx, group, magnitude)}`
   }
 
-  return `${group}-${resolveSubValue(ctx, group, amount, NO_SUB_DEFAULTS)}`
+  return `${group}-${resolveSubValue(ctx, group, amount)}`
 }
 
 /** Shared implementation of `filter` and `backdrop-filter`. */

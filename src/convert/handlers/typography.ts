@@ -13,11 +13,12 @@
 import type { HandlerGroup, ValueTable } from '../registry.js'
 import { isNumber, isUnit } from '../../utils/unit.js'
 import { toArbitrary } from '../../utils/value.js'
-import { FONT_SIZE_SCALE, LINE_HEIGHT_RATIOS } from '../../theme/scales.js'
+import { LINE_HEIGHT_RATIOS } from '../../theme/scales.js'
 import {
   arbitraryColorProperty,
   arbitraryLengthProperty,
   arbitraryProperty,
+  arbitraryValue,
   colorHandler,
   colorKeywords,
   identityTable
@@ -129,18 +130,11 @@ export const typographyHandlers: HandlerGroup = {
   'font-family': value => `font-[${toArbitrary(value)}]`,
 
   /**
-   * The original always emitted `text-[…]` and never looked at Tailwind's own
-   * size ladder (issue #12). `convertDeclaration` now resolves the ladder from
-   * the preset first; the check is repeated here so a direct call behaves the
-   * same way.
+   * The named size ladder lives in the version preset and is resolved by
+   * `convertDeclaration` before this runs (issue #12, which the original never
+   * addressed), so only the arbitrary fallback is left here.
    */
-  'font-size': (value, ctx) => {
-    if (ctx.useAllDefaultValues) {
-      const preset = FONT_SIZE_SCALE[value]
-      if (preset) return preset
-    }
-    return isUnit(value) ? `text-[${toArbitrary(value)}]` : ''
-  },
+  'font-size': arbitraryValue('text', isUnit),
 
   'font-size-adjust': arbitraryLengthProperty('font-size-adjust'),
 

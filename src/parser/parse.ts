@@ -48,21 +48,29 @@ export interface StyleSheet {
   diagnostics: Diagnostic[]
 }
 
-const makeRule = (prelude: string, start: number): Rule => ({
-  kind: 'rule',
-  selector: collapse(prelude),
-  selectors: splitTopLevel(prelude, ',')
-    .map(collapse)
-    .filter(v => v !== ''),
-  declarations: [],
-  children: [],
-  start,
-  end: start
-})
+const makeRule = (prelude: string, start: number): Rule => {
+  // Collapsing is idempotent across a comma, so the selector list can be split
+  // out of the already-collapsed string instead of collapsing each part again.
+  const selector = collapse(prelude)
+  return {
+    kind: 'rule',
+    selector,
+    selectors: splitTopLevel(selector, ',')
+      .map(part => part.trim())
+      .filter(part => part !== ''),
+    declarations: [],
+    children: [],
+    start,
+    end: start
+  }
+}
+
+/** `@name` followed by the rest of the prelude. */
+const AT_RULE_RE = /^@([\w-]*)\s*([\s\S]*)$/
 
 const makeAtRule = (prelude: string, start: number, hasBlock: boolean): AtRule => {
   const collapsed = collapse(prelude)
-  const match = /^@([\w-]*)\s*([\s\S]*)$/.exec(collapsed)
+  const match = AT_RULE_RE.exec(collapsed)
   return {
     kind: 'atrule',
     name: (match?.[1] ?? '').toLowerCase(),

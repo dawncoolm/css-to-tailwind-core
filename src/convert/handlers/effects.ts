@@ -68,8 +68,9 @@ export const effectHandlers: HandlerGroup = {
    */
   'box-shadow': (value, ctx) => {
     if (ctx.useAllDefaultValues) {
-      const named =
-        ctx.theme.boxShadow[value] ?? ctx.theme.boxShadow[normalizeShadow(value)]
+      // Only the normalised spelling can add anything: `convertDeclaration` has
+      // already tried this table with the value exactly as written.
+      const named = ctx.theme.defaults['box-shadow']?.[normalizeShadow(value)]
       if (named !== undefined) return named
     }
     return arbitraryProperty('box-shadow', value)

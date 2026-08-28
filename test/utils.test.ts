@@ -5,6 +5,7 @@ import { isAngle, isLength, isNumber, isPercentage, isTime, isUnit } from '../sr
 import {
   compactBrackets,
   hasNegative,
+  splitFirst,
   splitTopLevel,
   splitTopLevelWhitespace,
   toArbitrary,
@@ -122,11 +123,14 @@ describe('value helpers', () => {
 
   it('splits only at the top level', () => {
     expect(splitTopLevel('a,b(c,d),e', ',')).toEqual(['a', 'b(c,d)', 'e'])
-    expect(splitTopLevel('a:"b:c"', ':', 1)).toEqual(['a', '"b:c"'])
+    expect(splitTopLevel('a,"b,c"', ',')).toEqual(['a', '"b,c"'])
   })
 
-  it('honours the split limit', () => {
-    expect(splitTopLevel('a:b:c', ':', 1)).toEqual(['a', 'b:c'])
+  it('splits at the first top level separator only', () => {
+    expect(splitFirst('a:b:c', ':')).toEqual(['a', 'b:c'])
+    expect(splitFirst('a:"b:c"', ':')).toEqual(['a', '"b:c"'])
+    expect(splitFirst('url(a:b)', ':')).toBeNull()
+    expect(splitFirst('no-separator', ':')).toBeNull()
   })
 
   it('splits on whitespace outside brackets', () => {

@@ -1,6 +1,6 @@
 /** Turning raw `property: value` text into structured declarations. */
 
-import { splitTopLevel } from '../utils/value.js'
+import { splitFirst } from '../utils/value.js'
 
 export interface Declaration {
   /** Lower-cased property name, e.g. `background-color`. Vendor prefixes kept. */
@@ -29,13 +29,13 @@ const IMPORTANT_RE = /!\s*important\s*$/i
  * @returns `null` when the text is not a declaration (no colon, or empty name).
  */
 export const parseDeclaration = (raw: string, start: number): Declaration | null => {
-  const parts = splitTopLevel(raw, ':', 1)
-  if (parts.length < 2) return null
+  const parts = splitFirst(raw, ':')
+  if (!parts) return null
 
-  const property = (parts[0] as string).trim().toLowerCase()
+  const property = parts[0].trim().toLowerCase()
   if (property === '') return null
 
-  let value = (parts[1] as string).trim()
+  let value = parts[1].trim()
   const important = IMPORTANT_RE.test(value)
   if (important) {
     value = value.replace(IMPORTANT_RE, '').trim()

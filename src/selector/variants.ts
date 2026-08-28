@@ -13,9 +13,7 @@ const RENAMED: Readonly<Record<string, string>> = Object.freeze({
   'first-child': 'first',
   'last-child': 'last',
   'only-child': 'only',
-  'placeholder-shown': 'placeholder-shown',
-  'file-selector-button': 'file',
-  'read-only': 'read-only'
+  'file-selector-button': 'file'
 })
 
 /** Pseudo selectors whose Tailwind variant has the identical name. */
@@ -53,7 +51,7 @@ export interface ParsedSelector {
   base: string
 }
 
-const toVariant = (kind: string, name: string, arg: string | undefined): string | null => {
+const toVariant = (kind: string, name: string, arg: string | undefined): string => {
   const lower = name.toLowerCase()
 
   if (lower === 'nth-child' && arg !== undefined) {
@@ -88,9 +86,7 @@ export const parseSelector = (selector: string): ParsedSelector => {
   for (;;) {
     const pseudo = TRAILING_PSEUDO.exec(base)
     if (pseudo) {
-      const variant = toVariant(pseudo[1] as string, pseudo[2] as string, pseudo[4])
-      if (variant === null) break
-      collected.push(variant)
+      collected.push(toVariant(pseudo[1] as string, pseudo[2] as string, pseudo[4]))
       base = base.slice(0, pseudo.index)
       continue
     }

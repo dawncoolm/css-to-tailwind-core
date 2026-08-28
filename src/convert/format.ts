@@ -31,16 +31,28 @@ const applyPrefix = (className: string, prefix: string): string => {
     : `${prefix}${className}`
 }
 
+/**
+ * Render a variant chain as the string that goes in front of a class.
+ *
+ * Every declaration in a rule shares the same chain, so this is computed once
+ * per rule rather than once per declaration.
+ *
+ * @param variants Outermost first, e.g. `['sm', 'hover']` for `sm:hover:flex`.
+ */
+export const variantPrefixOf = (variants: readonly string[]): string =>
+  variants.length > 0 ? `${variants.join(':')}:` : ''
+
 export interface FormatOptions {
-  /** Outermost first, e.g. `['sm', 'hover']` for `sm:hover:flex`. */
-  variants: readonly string[]
+  /** Output of {@link variantPrefixOf}; `''` when there are no variants. */
+  variantPrefix: string
   important: boolean
   prefix: string
   version: TailwindVersion
 }
 
 /**
- * Apply prefix, important marker and variants to every class in a list.
+ * Apply prefix, important marker and variants to every class, appending the
+ * results to `out`.
  *
  * The original package applied variants to the first class only whenever the
  * list started with `transform`, `filter` or `backdrop-filter`, producing
@@ -49,21 +61,21 @@ export interface FormatOptions {
  */
 export const formatClasses = (
   classes: readonly string[],
+  out: string[],
   options: FormatOptions
-): string[] => {
-  const { variants, important, prefix, version } = options
-  const variantPrefix = variants.length > 0 ? `${variants.join(':')}:` : ''
+): void => {
+  const { variantPrefix, important, prefix, version } = options
 
-  return classes.map(className => {
+  for (const className of classes) {
     let result = applyPrefix(className, prefix)
     if (important) result = applyImportant(result, version)
-    return `${variantPrefix}${result}`
-  })
+    out.push(`${variantPrefix}${result}`)
+  }
 }
 
 /** Split a handler's output into individual classes, dropping empty entries. */
 export const splitClasses = (value: string): string[] =>
-  value.length === 0 ? [] : value.split(' ').filter(v => v !== '')
+  value.split(' ').filter(v => v !== '')
 
 /** Remove duplicate classes while keeping first-seen order. */
 export const dedupe = (classes: readonly string[]): string[] => {

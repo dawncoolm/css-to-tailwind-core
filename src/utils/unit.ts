@@ -72,8 +72,11 @@ export const isPercentage = (value: string): boolean => {
   return trimmed.endsWith('%') && isNumber(trimmed.slice(0, -1))
 }
 
+/** A custom property reference: `var(` followed by a `--` name. */
+const VAR_REFERENCE_RE = /^var\(\s*--/
+
 /** A CSS custom property reference, e.g. `var(--gap)`. */
-export const isVar = (value: string): boolean => /^var\(\s*--/.test(value.trim())
+export const isVar = (value: string): boolean => VAR_REFERENCE_RE.test(value.trim())
 
 /**
  * A call to a function whose result can stand in for a dimension, e.g.

@@ -150,7 +150,3 @@ export const tokenize = (input: string): TokenizeResult => {
 
   return { tokens, truncated, truncatedAt }
 }
-
-/** True when the character code is CSS whitespace. */
-export const isWhitespaceCode = (code: number): boolean =>
-  code === Char.Space || code === Char.Tab || code === Char.NewLine || code === Char.Return

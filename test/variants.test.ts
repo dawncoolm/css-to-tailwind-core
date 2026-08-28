@@ -74,9 +74,9 @@ describe('resolveAtRule', () => {
   it('maps the default breakpoints', () => {
     const ctx = createContext()
     expect(resolveAtRule(firstAtRule('@media (min-width: 640px) { a { color: red } }'), ctx))
-      .toMatchObject({ variant: 'sm' })
+      .toMatchObject({ kind: 'variant', variant: 'sm' })
     expect(resolveAtRule(firstAtRule('@media (min-width: 1536px) { a { color: red } }'), ctx))
-      .toMatchObject({ variant: '2xl' })
+      .toMatchObject({ kind: 'variant', variant: '2xl' })
   })
 
   it('maps max-width breakpoints', () => {
@@ -86,37 +86,37 @@ describe('resolveAtRule', () => {
         firstAtRule('@media not all and (min-width: 768px) { a { color: red } }'),
         ctx
       )
-    ).toMatchObject({ variant: 'max-md' })
+    ).toMatchObject({ kind: 'variant', variant: 'max-md' })
   })
 
   it('falls back to an arbitrary variant', () => {
     const ctx = createContext()
     expect(resolveAtRule(firstAtRule('@media (min-width: 900px) { a { color: red } }'), ctx))
-      .toMatchObject({ variant: '[@media(min-width:900px)]' })
+      .toMatchObject({ kind: 'variant', variant: '[@media(min-width:900px)]' })
   })
 
   it('honours customTheme.media', () => {
     const ctx = createContext({ customTheme: { media: { '@media (min-width: 1800px)': '3xl' } } })
     expect(resolveAtRule(firstAtRule('@media (min-width: 1800px) { a { color: red } }'), ctx))
-      .toMatchObject({ variant: '3xl' })
+      .toMatchObject({ kind: 'variant', variant: '3xl' })
   })
 
   it('turns @supports into a supports variant', () => {
     const ctx = createContext()
     expect(resolveAtRule(firstAtRule('@supports (display: grid) { a { color: red } }'), ctx))
-      .toMatchObject({ variant: 'supports-[display:_grid]' })
+      .toMatchObject({ kind: 'variant', variant: 'supports-[display:_grid]' })
   })
 
   it('treats @layer as transparent', () => {
     const ctx = createContext()
-    expect(resolveAtRule(firstAtRule('@layer base { a { color: red } }'), ctx)).toMatchObject({
-      transparent: true
+    expect(resolveAtRule(firstAtRule('@layer base { a { color: red } }'), ctx)).toEqual({
+      kind: 'transparent'
     })
   })
 
   it('flags unsupported at-rules', () => {
     const ctx = createContext()
     expect(resolveAtRule(firstAtRule('@keyframes spin { from { opacity: 0 } }'), ctx))
-      .toMatchObject({ unsupported: true })
+      .toEqual({ kind: 'unsupported' })
   })
 })

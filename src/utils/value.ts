@@ -61,32 +61,13 @@ const isFlat = (value: string): boolean => {
  *
  * This is what keeps `url(data:image/svg+xml;base64,AAA)` and `"a, b"` in one
  * piece where a naive `String.prototype.split` would tear them apart.
- *
- * @param limit Stop after this many splits and return the remainder as the last
- *   entry. Used to isolate the property name from a declaration, where only the
- *   first colon is a separator.
  */
-export const splitTopLevel = (
-  value: string,
-  separator: string,
-  limit = Infinity
-): string[] => {
+export const splitTopLevel = (value: string, separator: string): string[] => {
+  // Most declaration values contain nothing that could nest a separator, and the
+  // `split` intrinsic beats walking the string by hand.
+  if (isFlat(value)) return value.split(separator)
+
   const separatorCode = separator.charCodeAt(0)
-
-  if (isFlat(value)) {
-    if (limit === Infinity) return value.split(separator)
-    const parts: string[] = []
-    let start = 0
-    for (let i = 0; i < value.length && parts.length < limit; i++) {
-      if (value.charCodeAt(i) === separatorCode) {
-        parts.push(value.slice(start, i))
-        start = i + 1
-      }
-    }
-    parts.push(value.slice(start))
-    return parts
-  }
-
   const parts: string[] = []
   let depth = 0
   let quote = 0
@@ -107,7 +88,7 @@ export const splitTopLevel = (
       depth++
     } else if (isCloser(code)) {
       if (depth > 0) depth--
-    } else if (code === separatorCode && depth === 0 && parts.length < limit) {
+    } else if (code === separatorCode && depth === 0) {
       parts.push(value.slice(start, i))
       start = i + 1
     }
@@ -115,6 +96,45 @@ export const splitTopLevel = (
 
   parts.push(value.slice(start))
   return parts
+}
+
+/**
+ * Split at the first top-level occurrence of `separator`.
+ *
+ * Used to cut a declaration at its property/value colon, where every later colon
+ * belongs to the value: `background: url(data:image/png;base64,AA==)`.
+ *
+ * @returns `[before, after]`, or `null` when the separator does not occur.
+ */
+export const splitFirst = (
+  value: string,
+  separator: string
+): [head: string, tail: string] | null => {
+  const separatorCode = separator.charCodeAt(0)
+  let depth = 0
+  let quote = 0
+
+  for (let i = 0; i < value.length; i++) {
+    const code = value.charCodeAt(i)
+
+    if (quote !== 0) {
+      if (code === Code.Backslash) i++
+      else if (code === quote) quote = 0
+      continue
+    }
+
+    if (code === Code.Quote || code === Code.Apostrophe) {
+      quote = code
+    } else if (isOpener(code)) {
+      depth++
+    } else if (isCloser(code)) {
+      if (depth > 0) depth--
+    } else if (code === separatorCode && depth === 0) {
+      return [value.slice(0, i), value.slice(i + 1)]
+    }
+  }
+
+  return null
 }
 
 /** Collapse every run of whitespace to a single space, and trim. */

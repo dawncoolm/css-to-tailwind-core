@@ -11,7 +11,6 @@ export interface ResolvedTheme {
   readonly media: Readonly<Record<string, string>>
   /** Border radius length -> class suffix, `''` for the bare `rounded`. */
   readonly radius: Readonly<Record<string, string>>
-  readonly boxShadow: Readonly<Record<string, string>>
   /** Whole `filter()` call -> utility class. */
   readonly filter: Readonly<Record<string, string>>
   readonly spacing: Readonly<Record<string, string>>
@@ -27,8 +26,4 @@ const PRESETS: Readonly<Record<TailwindVersion, ResolvedTheme>> = Object.freeze(
 })
 
 /** Return the built-in preset for a Tailwind major version. */
-export const getPreset = (version: TailwindVersion): ResolvedTheme =>
-  PRESETS[version] ?? PRESETS[3]
-
-export { V3_PRESET, V4_PRESET }
-export * from './scales.js'
+export const getPreset = (version: TailwindVersion): ResolvedTheme => PRESETS[version]
